@@ -47,7 +47,11 @@ export const realApi: ApiService = {
             imageUrls: item.thumbnailUrl ? [item.thumbnailUrl] : [], // Map thumbnail to array
             createdAt: item.createdAt || '',
             updatedAt: item.updatedAt || '',
-            sellerName: item.sellerName || item.sellerNickname,
+            sellerName: item.sellerName,
+            sellerId: item.sellerId,
+            buyNowPrice: item.buyNowPrice,
+            viewCount: item.viewCount,
+            bidCount: item.bidCount,
             // Additional fields from ES view if needed in UI: viewCount, etc.
         }));
 
@@ -78,7 +82,11 @@ export const realApi: ApiService = {
             createdAt: '',
             updatedAt: '',
             buyNowPrice: data.buyNowPrice,
-            sellerName: data.sellerName || data.sellerNickname,
+            sellerName: data.sellerNickname,
+            sellerId: data.sellerId,
+            bidUnit: data.bidUnit,
+            viewCount: data.viewCount,
+            bidCount: data.bidCount,
         };
     },
 
@@ -92,7 +100,7 @@ export const realApi: ApiService = {
             description: data.description,
             category: data.category,
             startPrice: data.startPrice,
-            bidUnit: undefined, // Add if needed
+            bidUnit: data.bidUnit,
             buyNowPrice: data.buyNowPrice || undefined,
             auctionStartTime: `${data.startAt}:00`,
             auctionEndTime: `${data.endAt}:00`,

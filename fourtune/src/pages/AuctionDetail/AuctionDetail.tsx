@@ -17,6 +17,7 @@ const AuctionDetail: React.FC = () => {
     // Order status check for Buy Now
     const [myOrder, setMyOrder] = useState<OrderDetailResponse | null>(null);
     const [bidAmount, setBidAmount] = useState<number>(0);
+    const [showBidModal, setShowBidModal] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -64,7 +65,7 @@ const AuctionDetail: React.FC = () => {
     // Initialize bid amount when item is loaded
     useEffect(() => {
         if (item) {
-            setBidAmount(item.currentPrice + 1000);
+            setBidAmount(item.currentPrice + (item.bidUnit || 1000));
         }
     }, [item]);
 
@@ -76,11 +77,12 @@ const AuctionDetail: React.FC = () => {
         return true;
     };
 
-    const handleBidSubmit = async () => {
+    const handleBidClick = () => {
         if (!item) return;
         if (!checkAuth()) return;
 
-        const minBid = item.currentPrice + 1000;
+        const unit = item.bidUnit || 1000;
+        const minBid = item.currentPrice + unit;
 
         // 1. Validation: Verify minimum bid amount
         if (bidAmount < minBid) {
@@ -89,10 +91,12 @@ const AuctionDetail: React.FC = () => {
             return;
         }
 
-        // 2. Confirmation: Ask user before proceeding
-        if (!confirm(`${bidAmount.toLocaleString()}원에 입찰하시겠습니까?`)) {
-            return;
-        }
+        setShowBidModal(true);
+    };
+
+    const confirmBid = async () => {
+        if (!item) return;
+        setShowBidModal(false);
 
         try {
             const response = await api.placeBid(item.auctionItemId, bidAmount);
@@ -100,7 +104,7 @@ const AuctionDetail: React.FC = () => {
             // Refresh item data
             const updatedItem = await api.getAuctionById(item.auctionItemId);
             setItem(updatedItem);
-            setBidAmount(updatedItem.currentPrice + 1000); // Reset bid amount to new min
+            setBidAmount(updatedItem.currentPrice + (updatedItem.bidUnit || 1000)); // Reset bid amount to new min
         } catch (error: any) {
             console.error('Bidding failed', error);
             const errorMessage = error.response?.data?.message || '입찰에 실패했습니다.';
@@ -259,11 +263,19 @@ const AuctionDetail: React.FC = () => {
                             {item.status === AuctionStatus.ACTIVE && new Date() <= new Date(item.endAt) && (
                                 <>
                                     <div className={classes.bidControl}>
+                                        <div className={classes.bidInfo}>
+                                            <small style={{ display: 'block', marginBottom: '8px', color: '#666' }}>
+                                                입찰 단위: {(item.bidUnit || 1000).toLocaleString()}원
+                                            </small>
+                                        </div>
                                         <div className={classes.bidStepper}>
                                             <button
-                                                onClick={() => setBidAmount(prev => Math.max((item.currentPrice || 0) + 1000, prev - 1000))}
+                                                onClick={() => {
+                                                    const unit = item.bidUnit || 1000;
+                                                    setBidAmount(prev => Math.max((item.currentPrice || 0) + unit, prev - unit));
+                                                }}
                                                 className={classes.stepperBtn}
-                                                disabled={bidAmount <= (item.currentPrice || 0) + 1000}
+                                                disabled={bidAmount <= (item.currentPrice || 0) + (item.bidUnit || 1000)}
                                             >
                                                 -
                                             </button>
@@ -272,23 +284,78 @@ const AuctionDetail: React.FC = () => {
                                                 className={classes.bidInput}
                                                 value={bidAmount ? bidAmount.toLocaleString() : ''}
                                                 onChange={(e) => {
+                                                    // Allow numeric input
                                                     const val = Number(e.target.value.replace(/,/g, ''));
                                                     if (!isNaN(val)) setBidAmount(val);
                                                 }}
+                                                onBlur={() => {
+                                                    // Auto-correct to nearest valid unit increment
+                                                    const unit = item.bidUnit || 1000;
+                                                    const current = item.currentPrice || 0;
+                                                    const minBid = current + unit;
+
+                                                    if (bidAmount < minBid) {
+                                                        setBidAmount(minBid);
+                                                    } else {
+                                                        // Calculate steps from current price
+                                                        const diff = bidAmount - current;
+                                                        const steps = Math.round(diff / unit);
+                                                        const corrected = current + (steps * unit);
+                                                        setBidAmount(corrected);
+                                                    }
+                                                }}
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter') {
-                                                        handleBidSubmit();
+                                                        // Trigger blur logic first manually or trust the submit handler to validate
+                                                        // Ideally, handleBidSubmit has validation, but let's auto-correct on Enter too
+                                                        const unit = item.bidUnit || 1000;
+                                                        const current = item.currentPrice || 0;
+                                                        const minBid = current + unit;
+
+                                                        let finalAmount = bidAmount;
+                                                        if (bidAmount < minBid) {
+                                                            finalAmount = minBid;
+                                                        } else {
+                                                            const diff = bidAmount - current;
+                                                            const steps = Math.round(diff / unit);
+                                                            finalAmount = current + (steps * unit);
+                                                        }
+                                                        setBidAmount(finalAmount);
+
+                                                        // We might want to submit immediately, but since value changed,
+                                                        // maybe just let user see corrected value first.
+                                                        // Or submit with corrected value.
+                                                        // Let's just correct it on Enter for now, user can hit button.
+                                                        e.currentTarget.blur();
+                                                        // Trigger modal after small delay to let blur finish update if needed,
+                                                        // but since we updated state above, calling handleBidClick directly is fine
+                                                        // IF handleBidClick uses current state.
+                                                        // Note: state update is async, so handleBidClick might see old value if called immediately
+                                                        // BUT we set finalAmount above so we can pass it or just rely on next render.
+                                                        // Actually, handleBidClick reads 'bidAmount' state.
+                                                        // To be safe, let's just blur here and let user click button, OR
+                                                        // call handleBidClick but we need to wait for state update.
+                                                        // Simpler: Just blur. The user naturally will click button or hit enter again.
+                                                        // If we want "Enter to submit":
+                                                        setTimeout(() => document.getElementById('bidSubmitBtn')?.click(), 0);
                                                     }
                                                 }}
                                             />
                                             <button
-                                                onClick={() => setBidAmount(prev => prev + 1000)}
+                                                onClick={() => {
+                                                    const unit = item.bidUnit || 1000;
+                                                    setBidAmount(prev => prev + unit);
+                                                }}
                                                 className={classes.stepperBtn}
                                             >
                                                 +
                                             </button>
                                         </div>
-                                        <button onClick={handleBidSubmit} className={`btn btn-primary ${classes.bidSubmitButton}`}>
+                                        <button
+                                            id="bidSubmitBtn"
+                                            onClick={handleBidClick}
+                                            className={`btn btn-primary ${classes.bidSubmitButton}`}
+                                        >
                                             {bidAmount.toLocaleString()}원 입찰하기
                                         </button>
                                     </div>
@@ -359,6 +426,33 @@ const AuctionDetail: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Bid Confirmation Modal */}
+            {showBidModal && (
+                <div className={classes.modalOverlay} onClick={() => setShowBidModal(false)}>
+                    <div className={classes.modalContent} onClick={e => e.stopPropagation()}>
+                        <div className={classes.modalHeader}>입찰 확인</div>
+                        <div className={classes.modalBody}>
+                            <p>현재 입찰가: <span className={classes.modalHighlight}>{(item.currentPrice || 0).toLocaleString()}원</span></p>
+                            <p style={{ marginTop: '0.5rem' }}>
+                                내 입찰가: <span className={classes.modalHighlight} style={{ color: 'var(--color-primary)', fontSize: '1.4rem' }}>{bidAmount.toLocaleString()}원</span>
+                            </p>
+                            <p style={{ marginTop: '1.5rem', fontSize: '0.95rem' }}>
+                                입찰하시겠습니까? <br />
+                                낙찰 시 구매 의무가 발생합니다.
+                            </p>
+                        </div>
+                        <div className={classes.modalFooter}>
+                            <button className={`${classes.modalBtn} ${classes.modalBtnCancel}`} onClick={() => setShowBidModal(false)}>
+                                취소
+                            </button>
+                            <button className={`${classes.modalBtn} ${classes.modalBtnConfirm}`} onClick={confirmBid}>
+                                입찰하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

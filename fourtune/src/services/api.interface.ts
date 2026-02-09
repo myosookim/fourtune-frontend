@@ -25,6 +25,7 @@ export interface CreateAuctionRequest {
     description: string;
     category: AuctionCategory;
     startPrice: number;
+    bidUnit?: number;
     buyNowPrice?: number;
     startAt: string; // ISO 8601 format
     endAt: string;   // ISO 8601 format

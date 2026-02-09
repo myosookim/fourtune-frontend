@@ -107,6 +107,7 @@ export const mockApi: ApiService = {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             sellerName: mockApi.getCurrentUser()?.name || 'Me',
+            bidUnit: data.bidUnit || 1000,
         };
 
         // In a real scenario, this would be added to the backend
@@ -164,6 +165,11 @@ export const mockApi: ApiService = {
 
         if (bidAmount <= auction.currentPrice) {
             throw new Error("입찰가는 현재가보다 높아야 합니다.");
+        }
+
+        const unit = auction.bidUnit || 1000;
+        if ((bidAmount - auction.currentPrice) % unit !== 0) {
+            throw new Error(`입찰가는 현재가에서 ${unit.toLocaleString()}원 단위로 증가해야 합니다.`);
         }
 
         auction.currentPrice = bidAmount; // Hacky update for mock

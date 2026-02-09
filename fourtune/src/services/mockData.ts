@@ -153,7 +153,8 @@ const generateItems = (): AuctionItem[] => {
                 // Randomize createdAt to mix up the timeline (1 to 30 days ago)
                 createdAt: new Date(now - (Math.random() * 30 * day)).toISOString(),
                 updatedAt: new Date(now - day * 1).toISOString(),
-                sellerName: `User${Math.floor(Math.random() * 1000)}`
+                sellerName: `User${Math.floor(Math.random() * 1000)}`,
+                bidUnit: index % 3 === 0 ? 5000 : 1000,
             });
         });
     });

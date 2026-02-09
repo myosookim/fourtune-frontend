@@ -26,6 +26,7 @@ const CreateAuction: React.FC = () => {
         description: '',
         category: AuctionCategory.ETC,
         startPrice: 0,
+        bidUnit: 1000,
         buyNowPrice: undefined,
         startAt: getFutureDate(0, 1), // Default: 1 minute later
         endAt: getFutureDate(5),      // Default: 5 days later
@@ -43,7 +44,7 @@ const CreateAuction: React.FC = () => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: name === 'startPrice' || name === 'buyNowPrice' ? Number(value) : value
+            [name]: ['startPrice', 'buyNowPrice', 'bidUnit'].includes(name) ? Number(value) : value
         }));
     };
 
@@ -58,6 +59,7 @@ const CreateAuction: React.FC = () => {
         if (!formData.title.trim()) return '제목을 입력해주세요.';
         if (!formData.description.trim()) return '설명을 입력해주세요.';
         if (formData.startPrice <= 0) return '시작가는 0보다 커야 합니다.';
+        if (formData.bidUnit && formData.bidUnit <= 0) return '입찰 단위는 0보다 커야 합니다.';
 
         if (isBuyNowEnabled) {
             if (!formData.buyNowPrice || formData.buyNowPrice <= 0) {
@@ -205,6 +207,24 @@ const CreateAuction: React.FC = () => {
                         </div>
 
                         <div className={classes.formGroup}>
+                            <div className={classes.labelHeader}>
+                                <label htmlFor="bidUnit" className={classes.label}>입찰 단위 (원)</label>
+                            </div>
+                            <input
+                                id="bidUnit"
+                                name="bidUnit"
+                                type="number"
+                                className={classes.input}
+                                placeholder="1000"
+                                value={formData.bidUnit || ''}
+                                onChange={handleInputChange}
+                                min="1"
+                            />
+                        </div>
+                    </div>
+
+                    <div className={classes.formRow}>
+                        <div className={classes.formGroup} style={{ flex: 1 }}>
                             <div className={classes.labelHeader}>
                                 <label className={classes.label}>즉시구매가 (원)</label>
                                 <div className={classes.toggleWrapper}>
