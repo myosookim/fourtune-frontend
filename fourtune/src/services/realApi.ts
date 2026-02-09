@@ -47,6 +47,7 @@ export const realApi: ApiService = {
             imageUrls: item.thumbnailUrl ? [item.thumbnailUrl] : [], // Map thumbnail to array
             createdAt: item.createdAt || '',
             updatedAt: item.updatedAt || '',
+            sellerName: item.sellerName || item.sellerNickname,
             // Additional fields from ES view if needed in UI: viewCount, etc.
         }));
 
@@ -77,6 +78,7 @@ export const realApi: ApiService = {
             createdAt: '',
             updatedAt: '',
             buyNowPrice: data.buyNowPrice,
+            sellerName: data.sellerName || data.sellerNickname,
         };
     },
 
