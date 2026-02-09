@@ -37,6 +37,17 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({ item }) => {
                     <div className={classes.currentPriceLabel}>현재 입찰가</div>
                     <div className={classes.price}>{item.currentPrice.toLocaleString()}원</div>
                 </div>
+                <div className={classes.statsRow}>
+                    <div className={classes.statItem} title="조회수">
+                        <span>👁️</span> {item.viewCount || 0}
+                    </div>
+                    <div className={classes.statItem} title="관심">
+                        <span>❤️</span> {item.wishlistCount || 0}
+                    </div>
+                    <div className={classes.statItem} title="입찰">
+                        <span>🔨</span> {item.bidCount || 0}
+                    </div>
+                </div>
             </div>
         </Link>
     );

@@ -46,6 +46,7 @@ export interface AuctionItem {
     bidUnit?: number;
     viewCount?: number;
     bidCount?: number;
+    wishlistCount?: number;
 }
 
 export interface SearchResponse {

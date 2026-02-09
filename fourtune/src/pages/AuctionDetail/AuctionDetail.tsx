@@ -26,6 +26,9 @@ const AuctionDetail: React.FC = () => {
                 .then(data => {
                     setItem(data);
 
+                    // Increment view count
+                    api.increaseViewCount(Number(id)).catch(e => console.error('Failed to increase view count', e));
+
                     // 1. Initial Image Setup
                     if (data.imageUrls && data.imageUrls.length > 0) {
                         setSelectedImage(data.imageUrls[0]);
@@ -159,26 +162,48 @@ const AuctionDetail: React.FC = () => {
         }
     };
 
-    const toggleWishlist = () => {
+    const toggleWishlist = async () => {
         if (!item) return;
         if (!checkAuth()) return;
 
         try {
-            const saved = localStorage.getItem('wishlist');
-            let wishlist: number[] = saved ? JSON.parse(saved) : [];
-
+            // Optimistic Update
             if (isWishlisted) {
-                wishlist = wishlist.filter(wishId => wishId !== item.auctionItemId);
+                // Currently wishlisted -> remove it
                 setIsWishlisted(false);
+                setItem(prev => prev ? { ...prev, wishlistCount: Math.max(0, (prev.wishlistCount || 0) - 1) } : null);
+
+                await api.toggleWishlist(item.auctionItemId);
+
+                // Update Local Storage Sync
+                const saved = localStorage.getItem('wishlist');
+                let wishlist: number[] = saved ? JSON.parse(saved) : [];
+                wishlist = wishlist.filter(id => id !== item.auctionItemId);
+                localStorage.setItem('wishlist', JSON.stringify(wishlist));
+
                 alert('관심상품이 해제되었습니다.');
             } else {
-                wishlist.push(item.auctionItemId);
+                // Not wishlisted -> add it
                 setIsWishlisted(true);
+                setItem(prev => prev ? { ...prev, wishlistCount: (prev.wishlistCount || 0) + 1 } : null);
+
+                await api.toggleWishlist(item.auctionItemId);
+
+                // Update Local Storage Sync
+                const saved = localStorage.getItem('wishlist');
+                let wishlist: number[] = saved ? JSON.parse(saved) : [];
+                if (!wishlist.includes(item.auctionItemId)) {
+                    wishlist.push(item.auctionItemId);
+                }
+                localStorage.setItem('wishlist', JSON.stringify(wishlist));
+
                 alert('관심상품으로 등록되었습니다.');
             }
-            localStorage.setItem('wishlist', JSON.stringify(wishlist));
         } catch (e) {
             console.error('Failed to update wishlist', e);
+            // Revert on failure
+            setIsWishlisted(!isWishlisted);
+            setItem(prev => prev ? { ...prev, wishlistCount: (prev.wishlistCount || 0) + (isWishlisted ? 1 : -1) } : null);
             alert('관심상품 업데이트 중 오류가 발생했습니다.');
         }
     };
@@ -238,6 +263,18 @@ const AuctionDetail: React.FC = () => {
                     <span className={`${classes.badge} ${getStatusBadge(item.status)}`}>{getStatusText(item.status)}</span>
                     <h1 className={classes.title}>{item.title}</h1>
                     <div className={classes.category}>{AUCTION_CATEGORY_KO[item.category]}</div>
+
+                    <div className={classes.statsContainer}>
+                        <div className={classes.statItem} title="조회수">
+                            <span className={classes.statIcon}>👁️</span> {item.viewCount ? item.viewCount.toLocaleString() : 0}
+                        </div>
+                        <div className={classes.statItem} title="관심 등록 수">
+                            <span className={classes.statIcon}>❤️</span> {item.wishlistCount ? item.wishlistCount.toLocaleString() : 0}
+                        </div>
+                        <div className={classes.statItem} title="입찰 수">
+                            <span className={classes.statIcon}>🔨</span> {item.bidCount ? item.bidCount.toLocaleString() : 0}
+                        </div>
+                    </div>
 
                     <div className={classes.priceBox}>
                         <div className={classes.priceRow}>

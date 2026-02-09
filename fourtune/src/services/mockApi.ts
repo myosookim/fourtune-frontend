@@ -108,11 +108,48 @@ export const mockApi: ApiService = {
             updatedAt: new Date().toISOString(),
             sellerName: mockApi.getCurrentUser()?.name || 'Me',
             bidUnit: data.bidUnit || 1000,
+            viewCount: 0,
+            wishlistCount: 0,
+            bidCount: 0,
         };
 
         // In a real scenario, this would be added to the backend
         // For mock, we'll just return it
         return newAuction;
+    },
+
+    increaseViewCount: async (auctionId: number) => {
+        await delay(300);
+        const auction = MOCK_AUCTIONS.find(a => a.auctionItemId === auctionId);
+        if (auction) {
+            auction.viewCount = (auction.viewCount || 0) + 1;
+        }
+    },
+
+    toggleWishlist: async (auctionId: number) => {
+        await delay(300);
+        const auction = MOCK_AUCTIONS.find(a => a.auctionItemId === auctionId);
+        if (auction) {
+            const count = (auction.wishlistCount || 0);
+            // Simple toggle simulation for mock
+            // We don't track per-user state deeply in mock, just toggle count
+            // Logic: if we had a way to know if user liked it, we'd toggle.
+            // For mock demo, let's just increment or decrement randomly or just increment.
+            // Actually, let's use localStorage to track 'my' likes for consistency.
+            const saved = localStorage.getItem('wishlist');
+            let wishlist: number[] = saved ? JSON.parse(saved) : [];
+
+            if (wishlist.includes(auctionId)) {
+                // It's liked, so unlike
+                auction.wishlistCount = Math.max(0, count - 1);
+                return "관심상품이 해제되었습니다.";
+            } else {
+                // Like
+                auction.wishlistCount = count + 1;
+                return "관심상품에 등록되었습니다.";
+            }
+        }
+        return "";
     },
 
     // Mock Auth

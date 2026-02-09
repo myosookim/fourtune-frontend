@@ -52,6 +52,7 @@ export const realApi: ApiService = {
             buyNowPrice: item.buyNowPrice,
             viewCount: item.viewCount,
             bidCount: item.bidCount,
+            wishlistCount: item.wishlistCount,
             // Additional fields from ES view if needed in UI: viewCount, etc.
         }));
 
@@ -87,6 +88,7 @@ export const realApi: ApiService = {
             bidUnit: data.bidUnit,
             viewCount: data.viewCount,
             bidCount: data.bidCount,
+            wishlistCount: data.watchlistCount, // Backend field name is watchlistCount
         };
     },
 
@@ -139,6 +141,16 @@ export const realApi: ApiService = {
             createdAt: responseData.createdAt || new Date().toISOString(),
             updatedAt: responseData.updatedAt || new Date().toISOString()
         } as any;
+    },
+
+    increaseViewCount: async (auctionId: number) => {
+        // Backend uses PATCH /api/v1/auctions/{id}/view
+        await client.patch(`/api/v1/auctions/${auctionId}/view`);
+    },
+
+    toggleWishlist: async (auctionId: number) => {
+        const response = await client.post('/api/v1/watch-lists/toggle', { auctionItemId: auctionId });
+        return response.data; // Returns message string
     },
 
     login: async (email, password) => {

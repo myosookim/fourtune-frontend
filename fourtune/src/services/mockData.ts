@@ -155,6 +155,9 @@ const generateItems = (): AuctionItem[] => {
                 updatedAt: new Date(now - day * 1).toISOString(),
                 sellerName: `User${Math.floor(Math.random() * 1000)}`,
                 bidUnit: index % 3 === 0 ? 5000 : 1000,
+                viewCount: Math.floor(Math.random() * 500),
+                wishlistCount: Math.floor(Math.random() * 50),
+                bidCount: Math.floor(Math.random() * 20),
             });
         });
     });

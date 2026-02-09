@@ -118,7 +118,27 @@
 .category {
     color: var(--color-primary);
     font-weight: 600;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.statsContainer {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.statItem {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.statIcon {
+    font-size: 1.1rem;
 }
 
 .priceBox {
