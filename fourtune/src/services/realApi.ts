@@ -153,6 +153,15 @@ export const realApi: ApiService = {
         return response.data; // Returns message string
     },
 
+    getMyWishlist: async () => {
+        const response = await client.get('/api/v1/watch-lists');
+        // response.data is List<WatchListResponseDto>
+        // assume WatchListResponseDto has auctionItemId or id
+        // Let's verify DTO. But usually it's list of objects.
+        // Assuming user wants IDs to check inclusion.
+        return response.data.map((item: any) => item.auctionItemId);
+    },
+
     login: async (email, password) => {
         const response = await client.post('/api/auth/login', { email, password });
         // Assuming response.data is TokenResponse { accessToken: string, ... }

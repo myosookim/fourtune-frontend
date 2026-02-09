@@ -47,6 +47,7 @@ export interface ApiService {
     createAuction(data: CreateAuctionRequest, images?: File[]): Promise<AuctionItem>;
     increaseViewCount(auctionId: number): Promise<void>;
     toggleWishlist(auctionId: number): Promise<string>;
+    getMyWishlist(): Promise<number[]>;
 
     login(email: string, password?: string): Promise<{ user: { email: string; name: string } }>;
     signup(nickname: string, email: string, password?: string, phoneNumber?: string): Promise<{ user: { email: string; name: string } }>;

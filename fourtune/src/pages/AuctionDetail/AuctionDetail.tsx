@@ -24,7 +24,7 @@ const AuctionDetail: React.FC = () => {
         if (id) {
             setLoading(true);
             api.getAuctionById(Number(id))
-                .then(data => {
+                .then(async (data) => {
                     setItem(data);
 
                     // Increment view count (run only once per mount)
@@ -38,14 +38,31 @@ const AuctionDetail: React.FC = () => {
                         setSelectedImage(data.imageUrls[0]);
                     }
 
-                    // 2. Wishlist Check
-                    try {
-                        const saved = localStorage.getItem('wishlist');
-                        const wishlist = saved ? JSON.parse(saved) : [];
-                        setIsWishlisted(wishlist.includes(data.auctionItemId));
-                    } catch (e) {
-                        console.error('Failed to parse wishlist', e);
-                        setIsWishlisted(false);
+                    // 2. Wishlist Check - Check Server State
+                    if (api.isAuthenticated()) {
+                        try {
+                            const myWishlist = await api.getMyWishlist();
+                            setIsWishlisted(myWishlist.includes(data.auctionItemId));
+                        } catch (e) {
+                            console.error('Failed to sync wishlist status', e);
+                            // Fallback to local storage
+                            try {
+                                const saved = localStorage.getItem('wishlist');
+                                const wishlist = saved ? JSON.parse(saved) : [];
+                                setIsWishlisted(wishlist.includes(data.auctionItemId));
+                            } catch (lsError) {
+                                setIsWishlisted(false);
+                            }
+                        }
+                    } else {
+                        // Fallback for guest
+                        try {
+                            const saved = localStorage.getItem('wishlist');
+                            const wishlist = saved ? JSON.parse(saved) : [];
+                            setIsWishlisted(wishlist.includes(data.auctionItemId));
+                        } catch (e) {
+                            setIsWishlisted(false);
+                        }
                     }
 
                     // 3. Order Status Check (if SOLD_BY_BUY_NOW)
@@ -68,13 +85,6 @@ const AuctionDetail: React.FC = () => {
                 .finally(() => setLoading(false));
         }
     }, [id]);
-
-    // Initialize bid amount when item is loaded
-    useEffect(() => {
-        if (item) {
-            setBidAmount(item.currentPrice + (item.bidUnit || 1000));
-        }
-    }, [item]);
 
     const checkAuth = () => {
         if (!api.isAuthenticated()) {
@@ -170,44 +180,64 @@ const AuctionDetail: React.FC = () => {
         if (!item) return;
         if (!checkAuth()) return;
 
+        // Store previous state for revert
+        const prevIsWishlisted = isWishlisted;
+        const prevCount = item.wishlistCount || 0;
+
         try {
             // Optimistic Update
             if (isWishlisted) {
                 // Currently wishlisted -> remove it
                 setIsWishlisted(false);
                 setItem(prev => prev ? { ...prev, wishlistCount: Math.max(0, (prev.wishlistCount || 0) - 1) } : null);
-
-                await api.toggleWishlist(item.auctionItemId);
-
-                // Update Local Storage Sync
-                const saved = localStorage.getItem('wishlist');
-                let wishlist: number[] = saved ? JSON.parse(saved) : [];
-                wishlist = wishlist.filter(id => id !== item.auctionItemId);
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
-
-                alert('관심상품이 해제되었습니다.');
             } else {
                 // Not wishlisted -> add it
                 setIsWishlisted(true);
                 setItem(prev => prev ? { ...prev, wishlistCount: (prev.wishlistCount || 0) + 1 } : null);
-
-                await api.toggleWishlist(item.auctionItemId);
-
-                // Update Local Storage Sync
-                const saved = localStorage.getItem('wishlist');
-                let wishlist: number[] = saved ? JSON.parse(saved) : [];
-                if (!wishlist.includes(item.auctionItemId)) {
-                    wishlist.push(item.auctionItemId);
-                }
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
-
-                alert('관심상품으로 등록되었습니다.');
             }
+
+            // Sync with Server
+            const responseMessage = await api.toggleWishlist(item.auctionItemId);
+
+            // Server Response validation
+            // "관심상품에 등록되었습니다." means it is now ADDED.
+            // "관심상품이 해제되었습니다." means it is now REMOVED.
+            const serverSaysAdded = responseMessage.includes('등록되었습니다');
+
+            // Update Local Storage Sync to match Server
+            const saved = localStorage.getItem('wishlist');
+            let wishlist: number[] = saved ? JSON.parse(saved) : [];
+
+            if (serverSaysAdded) {
+                if (!wishlist.includes(item.auctionItemId)) wishlist.push(item.auctionItemId);
+                // Force UI match if we were wrong
+                if (!prevIsWishlisted) {
+                    // We optimistically added, and server added -> Good.
+                } else {
+                    // We optimistically removed, but server added ?? 
+                    // Means we were out of sync. Correct UI.
+                    setIsWishlisted(true);
+                    // Count is trickier if we don't know the absolute truth, but trust optimistic if we match
+                }
+            } else {
+                wishlist = wishlist.filter(id => id !== item.auctionItemId);
+                // Force UI match if we were wrong
+                if (prevIsWishlisted) {
+                    // We optimistically removed, server removed -> Good.
+                } else {
+                    // We optimistically added, server removed ??
+                    setIsWishlisted(false);
+                }
+            }
+            localStorage.setItem('wishlist', JSON.stringify(wishlist));
+
+            alert(responseMessage);
+
         } catch (e) {
             console.error('Failed to update wishlist', e);
             // Revert on failure
-            setIsWishlisted(!isWishlisted);
-            setItem(prev => prev ? { ...prev, wishlistCount: (prev.wishlistCount || 0) + (isWishlisted ? 1 : -1) } : null);
+            setIsWishlisted(prevIsWishlisted);
+            setItem(prev => prev ? { ...prev, wishlistCount: prevCount } : null);
             alert('관심상품 업데이트 중 오류가 발생했습니다.');
         }
     };

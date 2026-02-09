@@ -131,25 +131,34 @@ export const mockApi: ApiService = {
         const auction = MOCK_AUCTIONS.find(a => a.auctionItemId === auctionId);
         if (auction) {
             const count = (auction.wishlistCount || 0);
-            // Simple toggle simulation for mock
-            // We don't track per-user state deeply in mock, just toggle count
-            // Logic: if we had a way to know if user liked it, we'd toggle.
-            // For mock demo, let's just increment or decrement randomly or just increment.
-            // Actually, let's use localStorage to track 'my' likes for consistency.
+
+            // Check localStorage for mock consistency
             const saved = localStorage.getItem('wishlist');
             let wishlist: number[] = saved ? JSON.parse(saved) : [];
 
             if (wishlist.includes(auctionId)) {
                 // It's liked, so unlike
                 auction.wishlistCount = Math.max(0, count - 1);
+                // Sync LS
+                wishlist = wishlist.filter(id => id !== auctionId);
+                localStorage.setItem('wishlist', JSON.stringify(wishlist));
                 return "관심상품이 해제되었습니다.";
             } else {
                 // Like
                 auction.wishlistCount = count + 1;
+                // Sync LS
+                if (!wishlist.includes(auctionId)) wishlist.push(auctionId);
+                localStorage.setItem('wishlist', JSON.stringify(wishlist));
                 return "관심상품에 등록되었습니다.";
             }
         }
         return "";
+    },
+
+    getMyWishlist: async () => {
+        await delay(300);
+        const saved = localStorage.getItem('wishlist');
+        return saved ? JSON.parse(saved) : [];
     },
 
     // Mock Auth
