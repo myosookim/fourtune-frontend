@@ -18,6 +18,7 @@ const AuctionDetail: React.FC = () => {
     const [myOrder, setMyOrder] = useState<OrderDetailResponse | null>(null);
     const [bidAmount, setBidAmount] = useState<number>(0);
     const [showBidModal, setShowBidModal] = useState(false);
+    const viewCountIncremented = React.useRef(false);
 
     useEffect(() => {
         if (id) {
@@ -26,8 +27,11 @@ const AuctionDetail: React.FC = () => {
                 .then(data => {
                     setItem(data);
 
-                    // Increment view count
-                    api.increaseViewCount(Number(id)).catch(e => console.error('Failed to increase view count', e));
+                    // Increment view count (run only once per mount)
+                    if (!viewCountIncremented.current) {
+                        viewCountIncremented.current = true;
+                        api.increaseViewCount(Number(id)).catch(e => console.error('Failed to increase view count', e));
+                    }
 
                     // 1. Initial Image Setup
                     if (data.imageUrls && data.imageUrls.length > 0) {
