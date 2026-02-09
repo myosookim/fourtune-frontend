@@ -147,10 +147,41 @@ export const realApi: ApiService = {
         const { accessToken } = response.data;
         localStorage.setItem('token', accessToken);
 
-        // Clear potential stale user data from mock sessions
+        // Clear potential stale user data
         localStorage.removeItem('user');
 
-        return { user: { email, name: 'User' } };
+        let user = { email, name: 'User', id: 0 };
+
+        try {
+            // Try to extract ID from token
+            const payload = parseJwt(accessToken);
+            const userId = payload.sub ? Number(payload.sub) : 0;
+
+            if (userId && !isNaN(userId)) {
+                // Fetch full user details
+                try {
+                    const userDetail = await realApi.getUser(userId);
+                    user = {
+                        email: userDetail.email,
+                        name: userDetail.nickname,
+                        id: userDetail.id
+                    };
+                    // Store user info for persistence
+                    localStorage.setItem('user', JSON.stringify(user));
+                } catch (fetchErr) {
+                    console.error('Failed to fetch user details after login', fetchErr);
+                    // Fallback to basic info from token if available
+                    user.id = userId;
+                    if (payload.email) user.email = payload.email;
+                    if (payload.name) user.name = payload.name;
+                    localStorage.setItem('user', JSON.stringify(user));
+                }
+            }
+        } catch (e) {
+            console.error('Error processing login user data', e);
+        }
+
+        return { user };
     },
 
     signup: async (nickname, email, password, phoneNumber) => {
@@ -161,6 +192,7 @@ export const realApi: ApiService = {
 
     logout: () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         // Optional: Call network logout if needed
         // client.post('/api/auth/logout').catch(() => {});
     },
@@ -168,13 +200,17 @@ export const realApi: ApiService = {
     isAuthenticated: () => !!localStorage.getItem('token'),
 
     getCurrentUser: () => {
-        // Do NOT read 'user' from localStorage in realApi as it might be stale mock data
-        // const userStr = localStorage.getItem('user');
-        // if (userStr) return JSON.parse(userStr);
+        // 1. Try to get from localStorage (set during login)
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            try {
+                return JSON.parse(userStr);
+            } catch (e) {
+                console.error('Failed to parse user from storage');
+            }
+        }
 
-        // Always try to extract from token in real mode
-
-        // If no user object but we have a token, we could try to extract basic info
+        // 2. Fallback: Parse token
         const token = localStorage.getItem('token');
         if (token) {
             try {
@@ -182,8 +218,22 @@ export const realApi: ApiService = {
                 // backend: subject is userId (string)
                 console.log('realApi: Token payload', payload);
                 const userId = payload.sub ? Number(payload.sub) : undefined;
-                if (payload && payload.email) {
-                    return { id: userId, email: payload.email, name: 'User' };
+
+                const user = {
+                    id: userId,
+                    email: payload.email || '',
+                    name: payload.name || 'User'
+                };
+
+                // If we parsed successfully, might as well save it to avoid re-parsing
+                if (userId && !isNaN(userId)) {
+                    // Check if we need to fetch name? 
+                    // users might not have name in token. 
+                    // We let the UI handle the fetch if needed.
+                }
+
+                if (payload && (userId || payload.email)) {
+                    return user;
                 }
             } catch (e) {
                 console.error('Failed to parse token', e);
