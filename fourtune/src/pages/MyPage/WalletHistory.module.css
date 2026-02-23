@@ -5,11 +5,12 @@
 }
 
 .balanceCard {
-    background: linear-gradient(135deg, #2a755e 0%, #1b4d3e 100%);
+    background: linear-gradient(135deg, #e8f5e9 0%, #a8cda9 100%);
     border-radius: 16px;
     padding: 30px 40px;
-    color: #ffffff;
-    box-shadow: 0 10px 30px rgba(27, 77, 62, 0.2);
+    color: #073327;
+    box-shadow: 0 10px 30px rgba(27, 77, 62, 0.08);
+    /* Lighter shadow */
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -53,23 +54,25 @@
 }
 
 .chargeBtn {
-    background-color: #ffffff;
-    color: #1b4d3e;
+    background-color: #1b4d3e;
+    color: #ffffff;
 }
 
 .chargeBtn:hover {
-    background-color: #f1f8f6;
+    background-color: #143a2f;
+    color: #e8f5e9;
+    /* 하얀색에 가까운 초록색 */
     transform: translateY(-1px);
 }
 
 .withdrawBtn {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background-color: #eef4ec;
+    color: #113f2b;
+    border: 1px solid #1b4d3e;
 }
 
 .withdrawBtn:hover {
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: #f1f8f6;
 }
 
 .historySection {
