@@ -45,6 +45,22 @@ export interface RefundDto {
     status: string;
 }
 
+export interface NotificationResponseDto {
+    id: number;
+    type: string;
+    title: string;
+    content: string;
+    relatedUrl: string;
+    isRead: boolean;
+    sendAt: string;
+}
+
+export interface NotificationSettingsResponse {
+    isBidPushEnabled: boolean;
+    isPaymentPushEnabled: boolean;
+    isWatchListPushEnabled: boolean;
+}
+
 export interface UserDetail {
     id: number;
     email: string;
@@ -127,6 +143,14 @@ export interface ApiService {
     getWalletSummary(): Promise<WalletResponse>;
     getPayments(): Promise<PaymentDto[]>;
     getRefunds(): Promise<RefundDto[]>;
+
+    // Notifications
+    getMyNotifications(): Promise<NotificationResponseDto[]>;
+    readNotification(notificationId: number): Promise<void>;
+    deleteNotification(notificationId: number): Promise<void>;
+    getNotificationSettings(): Promise<NotificationSettingsResponse>;
+    updateNotificationSettings(settings: NotificationSettingsResponse): Promise<void>;
+    registerFcmToken(token: string): Promise<void>;
 }
 
 export interface OrderDetailResponse {

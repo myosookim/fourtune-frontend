@@ -8,8 +8,9 @@ import classes from './MyPage.module.css';
 import { LoginRequired } from '../../components/common/LoginRequired';
 import ProfileSettings from './ProfileSettings';
 import WalletHistory from './WalletHistory';
+import NotificationSettings from './NotificationSettings';
 
-type Tab = 'wishlist' | 'orders' | 'bids' | 'history' | 'profile' | 'wallet';
+type Tab = 'wishlist' | 'orders' | 'bids' | 'history' | 'profile' | 'wallet' | 'notifications';
 
 const MyPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<Tab>('wishlist');
@@ -90,6 +91,10 @@ const MyPage: React.FC = () => {
 
         if (activeTab === 'wallet') {
             return <WalletHistory />;
+        }
+
+        if (activeTab === 'notifications') {
+            return <NotificationSettings />;
         }
 
         if (activeTab === 'wishlist') {
@@ -212,6 +217,13 @@ const MyPage: React.FC = () => {
                     >
                         💰 지갑 / 결제 내역
                     </button>
+                    <button
+                        className={classes.walletActionBtn}
+                        onClick={() => setActiveTab('notifications')}
+                        style={{ marginTop: '8px' }}
+                    >
+                        🔔 알림 설정
+                    </button>
                 </div>
                 <nav className={classes.menu}>
                     <button onClick={() => setActiveTab('wishlist')} className={`${classes.menuItem} ${activeTab === 'wishlist' ? classes.activeMenu : ''}`}>
@@ -233,6 +245,7 @@ const MyPage: React.FC = () => {
                     <h2 className={classes.sectionTitle}>
                         {activeTab === 'profile' && '프로필 설정'}
                         {activeTab === 'wallet' && '지갑 / 결제 내역'}
+                        {activeTab === 'notifications' && '알림 설정'}
                         {activeTab === 'wishlist' && '관심상품'}
                         {activeTab === 'orders' && '구매 내역'}
                         {activeTab === 'bids' && '입찰 내역'}

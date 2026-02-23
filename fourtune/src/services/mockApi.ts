@@ -591,5 +591,59 @@ export const mockApi: ApiService = {
     getRefunds: async () => {
         await delay(500);
         return [];
+    },
+
+    // 알림 (Notifications)
+    getMyNotifications: async () => {
+        await delay(500);
+        return [
+            {
+                id: 1,
+                type: 'BID',
+                title: '입찰 성공',
+                content: '"Vintage Camera"에 최고 입찰자로 등극했습니다.',
+                relatedUrl: '/auctions/1',
+                isRead: false,
+                sendAt: new Date(Date.now() - 3600000).toISOString()
+            },
+            {
+                id: 2,
+                type: 'SYSTEM',
+                title: '환영합니다',
+                content: '포춘 경매에 가입하신 것을 환영합니다!',
+                relatedUrl: '/',
+                isRead: true,
+                sendAt: new Date(Date.now() - 86400000).toISOString()
+            }
+        ];
+    },
+
+    readNotification: async (notificationId: number) => {
+        await delay(300);
+        console.log(`Mock: Notification ${notificationId} marked as read`);
+    },
+
+    deleteNotification: async (notificationId: number) => {
+        await delay(300);
+        console.log(`Mock: Notification ${notificationId} deleted`);
+    },
+
+    getNotificationSettings: async () => {
+        await delay(500);
+        return {
+            isBidPushEnabled: true,
+            isPaymentPushEnabled: true,
+            isWatchListPushEnabled: false
+        };
+    },
+
+    updateNotificationSettings: async (settings) => {
+        await delay(500);
+        console.log(`Mock: Notification settings updated`, settings);
+    },
+
+    registerFcmToken: async (token: string) => {
+        await delay(500);
+        console.log(`Mock: FCM Token registered: ${token}`);
     }
 };
