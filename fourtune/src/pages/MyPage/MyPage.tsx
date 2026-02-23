@@ -6,8 +6,10 @@ import { type UserDetail } from '../../services/api.interface';
 import { AuctionCard } from '../../components/features/AuctionCard';
 import classes from './MyPage.module.css';
 import { LoginRequired } from '../../components/common/LoginRequired';
+import ProfileSettings from './ProfileSettings';
+import WalletHistory from './WalletHistory';
 
-type Tab = 'wishlist' | 'orders' | 'bids' | 'history';
+type Tab = 'wishlist' | 'orders' | 'bids' | 'history' | 'profile' | 'wallet';
 
 const MyPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<Tab>('wishlist');
@@ -24,19 +26,20 @@ const MyPage: React.FC = () => {
         return <LoginRequired message="로그인이 필요한 서비스입니다." />;
     }
 
-    useEffect(() => {
+    const fetchUserInfo = async () => {
         const currentUser = api.getCurrentUser();
-        console.log('MyPage: currentUser from token', currentUser);
         if (currentUser?.id) {
-            api.getUser(currentUser.id)
-                .then(data => {
-                    console.log('MyPage: Fetched user info', data);
-                    setUserInfo(data);
-                })
-                .catch(err => console.error("Failed to fetch user info", err));
-        } else {
-            console.warn('MyPage: No user ID found in token');
+            try {
+                const data = await api.getUser(currentUser.id);
+                setUserInfo(data);
+            } catch (err) {
+                console.error("Failed to fetch user info", err);
+            }
         }
+    };
+
+    useEffect(() => {
+        fetchUserInfo();
     }, []);
 
     useEffect(() => {
@@ -79,7 +82,15 @@ const MyPage: React.FC = () => {
     };
 
     const renderContent = () => {
-        if (loading) return <div className={classes.emptyState}>로딩 중...</div>;
+        if (loading && activeTab !== 'profile' && activeTab !== 'wallet') return <div className={classes.emptyState}>로딩 중...</div>;
+
+        if (activeTab === 'profile') {
+            return <ProfileSettings userInfo={userInfo} onUpdate={fetchUserInfo} />;
+        }
+
+        if (activeTab === 'wallet') {
+            return <WalletHistory />;
+        }
 
         if (activeTab === 'wishlist') {
             if (wishlistItems.length === 0) return <EmptyState icon="❤️" message="관심 상품이 없습니다." />;
@@ -189,6 +200,18 @@ const MyPage: React.FC = () => {
                             )}
                         </div>
                     )}
+                    <button
+                        className={classes.editProfileBtn}
+                        onClick={() => setActiveTab('profile')}
+                    >
+                        ⚙️ 프로필 수정
+                    </button>
+                    <button
+                        className={classes.walletActionBtn}
+                        onClick={() => setActiveTab('wallet')}
+                    >
+                        💰 지갑 / 결제 내역
+                    </button>
                 </div>
                 <nav className={classes.menu}>
                     <button onClick={() => setActiveTab('wishlist')} className={`${classes.menuItem} ${activeTab === 'wishlist' ? classes.activeMenu : ''}`}>
@@ -208,6 +231,8 @@ const MyPage: React.FC = () => {
             <main className={classes.content}>
                 <div className={classes.sectionHeader}>
                     <h2 className={classes.sectionTitle}>
+                        {activeTab === 'profile' && '프로필 설정'}
+                        {activeTab === 'wallet' && '지갑 / 결제 내역'}
                         {activeTab === 'wishlist' && '관심상품'}
                         {activeTab === 'orders' && '구매 내역'}
                         {activeTab === 'bids' && '입찰 내역'}

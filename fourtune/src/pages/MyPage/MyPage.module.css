@@ -304,6 +304,43 @@
     /* keep centered like profile */
 }
 
+.editProfileBtn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 8px 12px;
+    background-color: transparent;
+    color: #1b4d3e;
+    border: 1px solid #1b4d3e;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.editProfileBtn:hover {
+    background-color: #f1f8f6;
+}
+
+.walletActionBtn {
+    margin-top: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    background-color: #f1f8f6;
+    color: #1b4d3e;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.walletActionBtn:hover {
+    background-color: #e8f5e9;
+    border: 1px solid #c8e6c9;
+}
+
 .detailItem {
     font-size: 13px;
     color: #888;

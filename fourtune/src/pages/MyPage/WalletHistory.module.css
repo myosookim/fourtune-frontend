@@ -1,0 +1,192 @@
+.walletContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.balanceCard {
+    background: linear-gradient(135deg, #2a755e 0%, #1b4d3e 100%);
+    border-radius: 16px;
+    padding: 30px 40px;
+    color: #ffffff;
+    box-shadow: 0 10px 30px rgba(27, 77, 62, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.balanceTitle {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.balanceAmount {
+    font-size: 40px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.balanceAmount span {
+    font-size: 24px;
+    font-weight: 600;
+    margin-left: 4px;
+    opacity: 0.9;
+}
+
+.balanceActions {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.chargeBtn,
+.withdrawBtn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.chargeBtn {
+    background-color: #ffffff;
+    color: #1b4d3e;
+}
+
+.chargeBtn:hover {
+    background-color: #f1f8f6;
+    transform: translateY(-1px);
+}
+
+.withdrawBtn {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.withdrawBtn:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+.historySection {
+    background: #ffffff;
+    border: 1px solid #eef2f0;
+    border-radius: 16px;
+    padding: 24px;
+}
+
+.historyTitle {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 20px 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.historyList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.historyItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.historyItem:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.historyInfo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.eventType {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.typeCharge {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.typeUse {
+    background-color: #fce4e4;
+    color: #c92a2a;
+}
+
+.historyDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.relType {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+}
+
+.date {
+    font-size: 12px;
+    color: #888;
+}
+
+.amountInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.amount {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.amountPlus {
+    color: #2e7d32;
+}
+
+.amountMinus {
+    color: #111;
+}
+
+.currentBalance {
+    font-size: 12px;
+    color: #888;
+}
+
+.emptyHistory {
+    text-align: center;
+    padding: 40px 0;
+    color: #888;
+    font-size: 15px;
+}
+
+.loadingState,
+.errorState {
+    text-align: center;
+    padding: 60px 0;
+    color: #666;
+    background: #fdfdfd;
+    border-radius: 12px;
+    border: 1px dashed #ddd;
+}

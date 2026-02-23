@@ -270,10 +270,33 @@ export const realApi: ApiService = {
             id: data.id,
             email: data.email,
             nickname: data.nickname,
+            phoneNumber: data.phoneNumber || '',
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
             status: data.status,
         };
+    },
+
+    updateProfile: async (nickname: string, phoneNumber: string) => {
+        await client.patch('/api/users/profile', { nickname, phoneNumber });
+        // Update local storage user name
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            try {
+                const user = JSON.parse(userStr);
+                user.name = nickname;
+                localStorage.setItem('user', JSON.stringify(user));
+            } catch (e) { }
+        }
+    },
+
+    changePassword: async (currentPassword: string, newPassword: string) => {
+        await client.patch('/api/users/password', { currentPassword, newPassword });
+    },
+
+    withdraw: async (password: string, reason?: string) => {
+        await client.delete('/api/users/withdraw', { data: { password, reason } });
+        realApi.logout();
     },
 
     // Bidding Implementation
@@ -372,6 +395,32 @@ export const realApi: ApiService = {
     getSettlementPendings: async () => {
         const response = await client.get('/api/settlements/pendings');
         return response.data.data; // ApiResponse<List<SettlementCandidatedItemDto>>
+    },
+
+    // Wallet & Payments
+    getWalletBalance: async () => {
+        const response = await client.get('/api/payments/wallets/balance');
+        return response.data.data;
+    },
+
+    getWalletHistory: async () => {
+        const response = await client.get('/api/payments/wallets/history');
+        return response.data.data;
+    },
+
+    getWalletSummary: async () => {
+        const response = await client.get('/api/payments/wallets/summary');
+        return response.data.data;
+    },
+
+    getPayments: async () => {
+        const response = await client.get('/api/payments');
+        return response.data.data;
+    },
+
+    getRefunds: async () => {
+        const response = await client.get('/api/payments/refunds');
+        return response.data.data;
     }
 };
 

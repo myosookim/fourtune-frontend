@@ -46,6 +46,10 @@ cp env.example .env
 # true: 백엔드 서버 없이 프론트엔드 내부 가상 데이터 사용 (테스트용)
 # false: 실제 백엔드 API와 통신
 VITE_USE_MOCK=false
+
+# PG 결제 (토스페이먼츠)
+# Toss Developers > API 키 > 클라이언트 키
+VITE_TOSS_CLIENT_KEY=test_ck_YOUR_CLIENT_KEY
 ```
 
 > **Tip**: 백엔드 서버가 아직 준비되지 않았거나 프론트엔드 UI 작업만 할 때는 `VITE_USE_MOCK=true`로 설정하세요.
@@ -71,18 +75,24 @@ npm run dev
 
 ```
 src/
+├── assets/         # 정적 자원 (이미지, 아이콘 등)
 ├── components/     # 재사용 가능한 컴포넌트
 │   ├── common/     # 레이아웃, 헤더 등 공통 컴포넌트
-│   └── features/   # 특정 기능과 관련된 컴포넌트 (예: AuctionCard)
+│   └── features/   # 특정 기능과 관련된 컴포넌트
+├── constants/      # 상수 데이터 (번역 등)
 ├── pages/          # 페이지 단위 컴포넌트 (Routing)
 │   ├── Auth/       # 로그인, 회원가입
-│   ├── AuctionList/# 메인 리스트
-│   ├── AuctionDetail/# 상세 페이지
-│   ├── Cart/
-│   ├── CreateAuction/
-│   ├── Home/
-│   └── MyPage/     # 마이페이지
+│   ├── AuctionList/# 경매 리스트
+│   ├── AuctionDetail/# 경매 상세 페이지
+│   ├── Cart/       # 장바구니
+│   ├── CreateAuction/# 경매 생성
+│   ├── Home/       # 메인 홈페이지
+│   ├── MyPage/     # 마이페이지
+│   ├── Order/      # 주문서 작성
+│   ├── Payment/    # 결제 결과 처리
+│   └── Settlement/ # 정산 관리
 ├── services/       # API 통신 로직
+│   ├── api.interface.ts # API 인터페이스 정의
 │   ├── api.ts      # API 진입점 (Mock/Real 분기 처리)
 │   ├── mockApi.ts  # 가상 API 구현
 │   ├── realApi.ts  # 실제 백엔드 통신 구현
