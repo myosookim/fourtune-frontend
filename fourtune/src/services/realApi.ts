@@ -421,6 +421,33 @@ export const realApi: ApiService = {
     getRefunds: async () => {
         const response = await client.get('/api/payments/refunds');
         return response.data.data;
+    },
+
+    // Notifications
+    getMyNotifications: async () => {
+        const response = await client.get('/api/v1/notifications');
+        return response.data; // Backend returns List<NotificationResponseDto> directly (not wrapped in data)
+    },
+
+    readNotification: async (notificationId: number) => {
+        await client.patch(`/api/v1/notifications/${notificationId}/read`);
+    },
+
+    deleteNotification: async (notificationId: number) => {
+        await client.delete(`/api/v1/notifications/${notificationId}`);
+    },
+
+    getNotificationSettings: async () => {
+        const response = await client.get('/api/v1/notifications/settings');
+        return response.data; // NotificationSettingsResponse
+    },
+
+    updateNotificationSettings: async (settings) => {
+        await client.patch('/api/v1/notifications/settings', settings);
+    },
+
+    registerFcmToken: async (token: string) => {
+        await client.post('/api/v1/notifications/token', { token });
     }
 };
 
