@@ -11,6 +11,40 @@ import {
     type SettlementCandidatedItemDto
 } from '../types';
 
+export interface CashLogResponse {
+    id: number;
+    amount: number;
+    balance: number;
+    relTypeCode: string;
+    relId: number;
+    eventType: string;
+    createdAt: string;
+}
+
+export interface WalletResponse {
+    balance?: number;
+    history?: CashLogResponse[];
+}
+
+export interface PaymentDto {
+    id: number;
+    paymentKey: string;
+    orderId: string;
+    amount: number;
+    method: string;
+    status: string;
+    paidAt: string;
+}
+
+export interface RefundDto {
+    id: number;
+    paymentKey: string;
+    amount: number;
+    reason: string;
+    refundedAt: string;
+    status: string;
+}
+
 export interface UserDetail {
     id: number;
     email: string;
@@ -86,6 +120,13 @@ export interface ApiService {
     getSettlementHistory(): Promise<SettlementResponse>;
     getAllSettlements(): Promise<SettlementResponse[]>;
     getSettlementPendings(): Promise<SettlementCandidatedItemDto[]>;
+
+    // Wallet & Payments History
+    getWalletBalance(): Promise<WalletResponse>;
+    getWalletHistory(): Promise<WalletResponse>;
+    getWalletSummary(): Promise<WalletResponse>;
+    getPayments(): Promise<PaymentDto[]>;
+    getRefunds(): Promise<RefundDto[]>;
 }
 
 export interface OrderDetailResponse {

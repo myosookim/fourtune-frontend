@@ -7,8 +7,9 @@ import { AuctionCard } from '../../components/features/AuctionCard';
 import classes from './MyPage.module.css';
 import { LoginRequired } from '../../components/common/LoginRequired';
 import ProfileSettings from './ProfileSettings';
+import WalletHistory from './WalletHistory';
 
-type Tab = 'wishlist' | 'orders' | 'bids' | 'history' | 'profile';
+type Tab = 'wishlist' | 'orders' | 'bids' | 'history' | 'profile' | 'wallet';
 
 const MyPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<Tab>('wishlist');
@@ -81,10 +82,14 @@ const MyPage: React.FC = () => {
     };
 
     const renderContent = () => {
-        if (loading && activeTab !== 'profile') return <div className={classes.emptyState}>로딩 중...</div>;
+        if (loading && activeTab !== 'profile' && activeTab !== 'wallet') return <div className={classes.emptyState}>로딩 중...</div>;
 
         if (activeTab === 'profile') {
             return <ProfileSettings userInfo={userInfo} onUpdate={fetchUserInfo} />;
+        }
+
+        if (activeTab === 'wallet') {
+            return <WalletHistory />;
         }
 
         if (activeTab === 'wishlist') {
@@ -201,6 +206,12 @@ const MyPage: React.FC = () => {
                     >
                         ⚙️ 프로필 수정
                     </button>
+                    <button
+                        className={classes.walletActionBtn}
+                        onClick={() => setActiveTab('wallet')}
+                    >
+                        💰 지갑 / 결제 내역
+                    </button>
                 </div>
                 <nav className={classes.menu}>
                     <button onClick={() => setActiveTab('wishlist')} className={`${classes.menuItem} ${activeTab === 'wishlist' ? classes.activeMenu : ''}`}>
@@ -221,6 +232,7 @@ const MyPage: React.FC = () => {
                 <div className={classes.sectionHeader}>
                     <h2 className={classes.sectionTitle}>
                         {activeTab === 'profile' && '프로필 설정'}
+                        {activeTab === 'wallet' && '지갑 / 결제 내역'}
                         {activeTab === 'wishlist' && '관심상품'}
                         {activeTab === 'orders' && '구매 내역'}
                         {activeTab === 'bids' && '입찰 내역'}

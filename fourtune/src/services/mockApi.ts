@@ -553,5 +553,43 @@ export const mockApi: ApiService = {
                 payeeName: "Test User"
             }
         ];
+    },
+
+    // Wallet & Payments
+    getWalletBalance: async () => {
+        await delay(500);
+        return { balance: 50000 };
+    },
+
+    getWalletHistory: async () => {
+        await delay(500);
+        return {
+            history: [
+                { id: 1, amount: 10000, balance: 50000, relTypeCode: 'CHARGE', relId: 1, eventType: '충전', createdAt: new Date().toISOString() },
+                { id: 2, amount: -5000, balance: 40000, relTypeCode: 'PAYMENT', relId: 101, eventType: '결제', createdAt: new Date().toISOString() }
+            ]
+        };
+    },
+
+    getWalletSummary: async () => {
+        await delay(500);
+        return {
+            balance: 50000,
+            history: [
+                { id: 1, amount: 10000, balance: 50000, relTypeCode: 'CHARGE', relId: 1, eventType: '충전', createdAt: new Date().toISOString() }
+            ]
+        };
+    },
+
+    getPayments: async () => {
+        await delay(500);
+        return [
+            { id: 1, paymentKey: 'pay_1234', orderId: 'ord_123', amount: 5000, method: 'TOSS', status: 'DONE', paidAt: new Date().toISOString() }
+        ];
+    },
+
+    getRefunds: async () => {
+        await delay(500);
+        return [];
     }
 };

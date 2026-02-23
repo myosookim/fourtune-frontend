@@ -395,6 +395,32 @@ export const realApi: ApiService = {
     getSettlementPendings: async () => {
         const response = await client.get('/api/settlements/pendings');
         return response.data.data; // ApiResponse<List<SettlementCandidatedItemDto>>
+    },
+
+    // Wallet & Payments
+    getWalletBalance: async () => {
+        const response = await client.get('/api/payments/wallets/balance');
+        return response.data.data;
+    },
+
+    getWalletHistory: async () => {
+        const response = await client.get('/api/payments/wallets/history');
+        return response.data.data;
+    },
+
+    getWalletSummary: async () => {
+        const response = await client.get('/api/payments/wallets/summary');
+        return response.data.data;
+    },
+
+    getPayments: async () => {
+        const response = await client.get('/api/payments');
+        return response.data.data;
+    },
+
+    getRefunds: async () => {
+        const response = await client.get('/api/payments/refunds');
+        return response.data.data;
     }
 };
 
