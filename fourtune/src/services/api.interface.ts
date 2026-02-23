@@ -15,6 +15,7 @@ export interface UserDetail {
     id: number;
     email: string;
     nickname: string;
+    phoneNumber?: string;
     createdAt?: string;
     updatedAt?: string;
     status?: string;
@@ -55,6 +56,9 @@ export interface ApiService {
     isAuthenticated(): boolean;
     getCurrentUser(): { id?: number; email: string; name: string } | null;
     getUser(id: number): Promise<UserDetail>;
+    updateProfile(nickname: string, phoneNumber: string): Promise<void>;
+    changePassword(currentPassword: string, newPassword: string): Promise<void>;
+    withdraw(password: string, reason?: string): Promise<void>;
 
     // Bidding
     placeBid(auctionId: number, bidAmount: number): Promise<BidDetailResponse>;

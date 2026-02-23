@@ -196,10 +196,29 @@ export const mockApi: ApiService = {
             id,
             email: 'mock@example.com',
             nickname: 'Mock User',
+            phoneNumber: '010-1234-5678',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             status: 'ACTIVE'
         };
+    },
+
+    updateProfile: async (nickname: string, _phoneNumber: string) => {
+        await delay(500);
+        const user = mockApi.getCurrentUser();
+        if (user) {
+            user.name = nickname;
+            localStorage.setItem('user', JSON.stringify(user));
+        }
+    },
+
+    changePassword: async (_currentPassword: string, _newPassword: string) => {
+        await delay(500);
+    },
+
+    withdraw: async (_password: string, _reason?: string) => {
+        await delay(500);
+        mockApi.logout();
     },
 
     // Bidding Mock
