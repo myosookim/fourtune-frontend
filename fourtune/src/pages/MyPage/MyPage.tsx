@@ -11,7 +11,7 @@ import ProfileSettings from './ProfileSettings';
 type Tab = 'wishlist' | 'orders' | 'bids' | 'history' | 'profile';
 
 const MyPage: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<Tab>('profile');
+    const [activeTab, setActiveTab] = useState<Tab>('wishlist');
     const [userInfo, setUserInfo] = useState<UserDetail | null>(null);
     const [wishlistItems, setWishlistItems] = useState<AuctionItem[]>([]);
     const [orders, setOrders] = useState<any[]>([]);
@@ -195,11 +195,14 @@ const MyPage: React.FC = () => {
                             )}
                         </div>
                     )}
+                    <button
+                        className={classes.editProfileBtn}
+                        onClick={() => setActiveTab('profile')}
+                    >
+                        ⚙️ 프로필 수정
+                    </button>
                 </div>
                 <nav className={classes.menu}>
-                    <button onClick={() => setActiveTab('profile')} className={`${classes.menuItem} ${activeTab === 'profile' ? classes.activeMenu : ''}`}>
-                        ⚙️ 프로필 설정
-                    </button>
                     <button onClick={() => setActiveTab('wishlist')} className={`${classes.menuItem} ${activeTab === 'wishlist' ? classes.activeMenu : ''}`}>
                         ❤️ 관심상품
                     </button>
