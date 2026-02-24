@@ -45,24 +45,11 @@ const AuctionDetail: React.FC = () => {
                             setIsWishlisted(myWishlist.includes(data.auctionItemId));
                         } catch (e) {
                             console.error('Failed to sync wishlist status', e);
-                            // Fallback to local storage
-                            try {
-                                const saved = localStorage.getItem('wishlist');
-                                const wishlist = saved ? JSON.parse(saved) : [];
-                                setIsWishlisted(wishlist.includes(data.auctionItemId));
-                            } catch (lsError) {
-                                setIsWishlisted(false);
-                            }
+                            setIsWishlisted(false);
                         }
                     } else {
                         // Fallback for guest
-                        try {
-                            const saved = localStorage.getItem('wishlist');
-                            const wishlist = saved ? JSON.parse(saved) : [];
-                            setIsWishlisted(wishlist.includes(data.auctionItemId));
-                        } catch (e) {
-                            setIsWishlisted(false);
-                        }
+                        setIsWishlisted(false);
                     }
 
                     // 3. Order Status Check (if SOLD_BY_BUY_NOW)
@@ -204,12 +191,7 @@ const AuctionDetail: React.FC = () => {
             // "관심상품이 해제되었습니다." means it is now REMOVED.
             const serverSaysAdded = responseMessage.includes('등록되었습니다');
 
-            // Update Local Storage Sync to match Server
-            const saved = localStorage.getItem('wishlist');
-            let wishlist: number[] = saved ? JSON.parse(saved) : [];
-
             if (serverSaysAdded) {
-                if (!wishlist.includes(item.auctionItemId)) wishlist.push(item.auctionItemId);
                 // Force UI match if we were wrong
                 if (!prevIsWishlisted) {
                     // We optimistically added, and server added -> Good.
@@ -220,7 +202,6 @@ const AuctionDetail: React.FC = () => {
                     // Count is trickier if we don't know the absolute truth, but trust optimistic if we match
                 }
             } else {
-                wishlist = wishlist.filter(id => id !== item.auctionItemId);
                 // Force UI match if we were wrong
                 if (prevIsWishlisted) {
                     // We optimistically removed, server removed -> Good.
@@ -229,7 +210,6 @@ const AuctionDetail: React.FC = () => {
                     setIsWishlisted(false);
                 }
             }
-            localStorage.setItem('wishlist', JSON.stringify(wishlist));
 
             alert(responseMessage);
 
