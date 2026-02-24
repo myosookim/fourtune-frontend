@@ -101,11 +101,11 @@ export const realApi: ApiService = {
             title: data.title,
             description: data.description,
             category: data.category,
-            start_price: data.startPrice,
-            bid_unit: data.bidUnit,
-            buy_now_price: data.buyNowPrice || undefined,
-            auction_start_time: `${data.startAt}:00`,
-            auction_end_time: `${data.endAt}:00`,
+            startPrice: data.startPrice,
+            bidUnit: data.bidUnit,
+            buyNowPrice: data.buyNowPrice || undefined,
+            auctionStartTime: `${data.startAt}:00`,
+            auctionEndTime: `${data.endAt}:00`,
         };
 
         console.log('Sending createAuction payload:', payload);
@@ -149,7 +149,7 @@ export const realApi: ApiService = {
     },
 
     toggleWishlist: async (auctionId: number) => {
-        const response = await client.post('/api/v1/watch-lists/toggle', { auction_item_id: auctionId });
+        const response = await client.post('/api/v1/watch-lists/toggle', { auctionItemId: auctionId });
         return response.data; // Returns message string
     },
 
