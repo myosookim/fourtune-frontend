@@ -164,8 +164,8 @@ export const realApi: ApiService = {
 
     login: async (email, password) => {
         const response = await client.post('/api/auth/login', { email, password });
-        // The backend uses SNAKE_CASE, so the token is in access_token
-        const accessToken = response.data.access_token || response.data.accessToken;
+        // The backend uses camelCase
+        const accessToken = response.data.accessToken;
 
         if (!accessToken) {
             console.error('Login response missing token:', response.data);
@@ -213,7 +213,7 @@ export const realApi: ApiService = {
 
     signup: async (nickname, email, password, phoneNumber) => {
         // Backend returns Void (201 Created)
-        await client.post('/api/users/signup', { nickname, email, password, phone_number: phoneNumber });
+        await client.post('/api/users/signup', { nickname, email, password, phoneNumber: phoneNumber });
         return { user: { email, name: nickname } };
     },
 
@@ -287,7 +287,7 @@ export const realApi: ApiService = {
     },
 
     updateProfile: async (nickname: string, phoneNumber: string) => {
-        await client.patch('/api/users/profile', { nickname, phone_number: phoneNumber });
+        await client.patch('/api/users/profile', { nickname, phoneNumber });
         // Update local storage user name
         const userStr = localStorage.getItem('user');
         if (userStr) {
@@ -300,7 +300,7 @@ export const realApi: ApiService = {
     },
 
     changePassword: async (currentPassword: string, newPassword: string) => {
-        await client.patch('/api/users/password', { current_password: currentPassword, new_password: newPassword });
+        await client.patch('/api/users/password', { currentPassword: currentPassword, newPassword });
     },
 
     withdraw: async (password: string, reason?: string) => {
@@ -310,7 +310,7 @@ export const realApi: ApiService = {
 
     // Bidding Implementation
     placeBid: async (auctionId: number, bidAmount: number) => {
-        const response = await client.post('/api/v1/bids', { auction_id: auctionId, bid_amount: bidAmount });
+        const response = await client.post('/api/v1/bids', { auctionId, bidAmount });
         return response.data.data; // ApiResponse<BidDetailResponse>
     },
 
@@ -377,7 +377,7 @@ export const realApi: ApiService = {
     },
 
     buyNowFromCart: async (cartItemIds: number[]) => {
-        const response = await client.post('/api/v1/cart/buy-now', { cart_item_ids: cartItemIds });
+        const response = await client.post('/api/v1/cart/buy-now', { cartItemIds: cartItemIds });
         return response.data.data; // ApiResponse<List<String>> (orderIds)
     },
 
