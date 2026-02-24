@@ -52,16 +52,27 @@ const MyPage: React.FC = () => {
 
     const fetchWishlist = async () => {
         setLoading(true);
-        const saved = localStorage.getItem('wishlist');
-        if (saved) {
-            try {
-                const ids: number[] = JSON.parse(saved);
+        try {
+            // Fetch real wishlist IDs from backend instead of stale localStorage
+            const ids = await api.getMyWishlist();
+            if (ids && ids.length > 0) {
                 const promises = ids.map(id => api.getAuctionById(id).catch(() => null));
                 const results = await Promise.all(promises);
+                // Filter out nulls (deleted auctions that returned 404)
                 setWishlistItems(results.filter((item): item is AuctionItem => item !== null));
-            } catch (e) { console.error(e); }
+
+                // Keep localStorage in sync for other components that might rely on it
+                localStorage.setItem('wishlist', JSON.stringify(ids));
+            } else {
+                setWishlistItems([]);
+                localStorage.setItem('wishlist', JSON.stringify([]));
+            }
+        } catch (e) {
+            console.error('Failed to fetch wishlist', e);
+            setWishlistItems([]);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const fetchOrders = async () => {
