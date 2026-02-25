@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { type ApiService } from './api.interface';
+import { type AuctionItem } from '../types';
 
 // Use VITE_BACKEND_URL environment variable for backend server address
 // This keeps the backend URL secure and not exposed in the codebase
@@ -471,7 +472,40 @@ export const realApi: ApiService = {
 
     deleteAllRecentSearches: async () => {
         await client.delete('/api/v1/search/recent/all');
+    },
+
+    getRecommendations: async (size = 10) => {
+        const response = await client.get('/api/v1/recommendations', { params: { size } });
+        return mapRecommendationItems(response.data);
+    },
+
+    getPopularRecommendations: async (size = 10) => {
+        const response = await client.get('/api/v1/recommendations/popular', { params: { size } });
+        return mapRecommendationItems(response.data);
     }
+};
+
+const mapRecommendationItems = (items: any[]): AuctionItem[] => {
+    return items.map((item: any) => ({
+        auctionItemId: item.auctionItemId,
+        title: item.title,
+        description: '', // Not provided by recommendation API
+        category: item.category,
+        status: item.status,
+        startPrice: 0, // Not strictly needed for list, but interface requires it
+        currentPrice: item.currentPrice,
+        buyNowPrice: item.buyNowPrice,
+        startAt: item.startAt || '',
+        endAt: item.endAt || '',
+        imageUrls: item.thumbnailUrl ? [item.thumbnailUrl] : [],
+        createdAt: '',
+        updatedAt: '',
+        sellerName: '', // Not provided
+        sellerId: 0,
+        viewCount: item.viewCount,
+        bidCount: item.bidCount,
+        wishlistCount: item.watchlistCount,
+    }));
 };
 
 function parseJwt(token: string) {

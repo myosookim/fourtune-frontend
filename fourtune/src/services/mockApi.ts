@@ -665,5 +665,17 @@ export const mockApi: ApiService = {
     deleteAllRecentSearches: async () => {
         await delay(300);
         localStorage.setItem('recent_searches', JSON.stringify([]));
+    },
+
+    getRecommendations: async (size = 10) => {
+        await delay(500);
+        console.log('Mock: Getting personal recommendations');
+        return MOCK_AUCTIONS.slice(0, size);
+    },
+
+    getPopularRecommendations: async (size = 10) => {
+        await delay(500);
+        console.log('Mock: Getting popular recommendations');
+        return MOCK_AUCTIONS.slice(0, size);
     }
 };
