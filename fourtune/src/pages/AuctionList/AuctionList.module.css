@@ -3,23 +3,22 @@
 }
 
 .headerSection {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.searchBar {
+.controls {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    max-width: 600px;
-    position: relative;
+    gap: 1rem;
 }
 
 .searchContainer {
-    position: relative;
     width: 100%;
+    max-width: 400px;
+    position: relative;
 }
 
 
@@ -81,13 +80,19 @@
     }
 
     .headerSection {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: flex-end;
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    .searchBar {
+    .controls {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
         width: 100%;
+    }
+
+    .searchContainer {
+        width: 400px;
     }
 }
 
@@ -133,95 +138,15 @@
     border-color: var(--color-primary);
 }
 
-.recentSearches {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: white;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    z-index: 100;
-    margin-top: 4px;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+
+@media (min-width: 1280px) {
+    .grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
-.recentHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--color-border);
-    margin-bottom: 4px;
-}
-
-.recentTitle {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--color-text-muted);
-}
-
-.clearAllBtn {
-    font-size: 12px;
-    color: var(--color-text-muted);
-    background: none;
-    border: none;
-    cursor: pointer;
-}
-
-.clearAllBtn:hover {
-    color: var(--color-primary);
-    text-decoration: underline;
-}
-
-.recentList {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.recentItem {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--color-bg-subtle, #f3f4f6);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 13px;
-    transition: all 0.2s;
-}
-
-.recentItem:hover {
-    background: #e5e7eb;
-}
-
-.recentLabel {
-    cursor: pointer;
-}
-
-.removeBtn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #9ca3af;
-    padding: 0;
-}
-
-.removeBtn:hover {
-    color: #ef4444;
-}
-
-.emptyRecent {
-    font-size: 13px;
-    color: var(--color-text-muted);
+.loader {
     text-align: center;
-    padding: 8px 0;
+    padding: 4rem;
+    color: var(--color-text-muted);
 }

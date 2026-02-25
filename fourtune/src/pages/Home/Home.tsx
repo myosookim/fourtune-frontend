@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../services/api';
 import { type AuctionItem } from '../../types';
 import { AuctionCard } from '../../components/features/AuctionCard';
+import { SearchBar } from '../../components/features/SearchBar/SearchBar';
 import classes from './Home.module.css';
 
 const Home: React.FC = () => {
     const [recommendedItems, setRecommendedItems] = useState<AuctionItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+
+    const handleSearch = (keyword: string) => {
+        navigate(`/auctions?keyword=${encodeURIComponent(keyword)}`);
+    };
 
     useEffect(() => {
         const fetchRecommended = async () => {
@@ -40,6 +46,9 @@ const Home: React.FC = () => {
                     희귀한 수집품부터 일상 용품까지, <br />
                     CLOV4R에서 특별한 가격으로 만나보세요.
                 </p>
+                <div className={classes.searchWrapper}>
+                    <SearchBar onSearch={handleSearch} />
+                </div>
                 <Link to="/auctions" className="btn btn-primary btn-lg">
                     경매 둘러보기
                 </Link>
