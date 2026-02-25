@@ -156,6 +156,10 @@ export interface ApiService {
     getRecentSearches(): Promise<string[]>;
     deleteRecentSearch(keyword: string): Promise<void>;
     deleteAllRecentSearches(): Promise<void>;
+
+    // Recommendations
+    getRecommendations(size?: number): Promise<AuctionItem[]>;
+    getPopularRecommendations(size?: number): Promise<AuctionItem[]>;
 }
 
 export interface OrderDetailResponse {

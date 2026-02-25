@@ -18,15 +18,27 @@ const Home: React.FC = () => {
     useEffect(() => {
         const fetchRecommended = async () => {
             try {
-                // Fetch popular items (mock recommendation)
-                const response = await api.searchAuctions({
-                    page: 0,
-                    size: 8,
-                    sort: 'POPULAR'
-                });
-                setRecommendedItems(response.items);
+                let items;
+                if (api.isAuthenticated()) {
+                    items = await api.getRecommendations(8);
+                } else {
+                    items = await api.getPopularRecommendations(8);
+                }
+                setRecommendedItems(items);
             } catch (error) {
                 console.error('Failed to fetch recommended items', error);
+
+                // Final fallback to search API if recommendation service is down
+                try {
+                    const fallback = await api.searchAuctions({
+                        page: 0,
+                        size: 8,
+                        sort: 'POPULAR'
+                    });
+                    setRecommendedItems(fallback.items);
+                } catch (e) {
+                    console.error('All recommendation options failed', e);
+                }
             } finally {
                 setLoading(false);
             }
