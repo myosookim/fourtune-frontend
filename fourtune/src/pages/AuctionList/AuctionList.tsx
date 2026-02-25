@@ -16,6 +16,8 @@ const AuctionList: React.FC = () => {
 
     // Filters
     const [keyword, setKeyword] = useState('');
+    const [recentSearches, setRecentSearches] = useState<string[]>([]);
+    const [showRecent, setShowRecent] = useState(false);
     const [category, setCategory] = useState<AuctionCategory | ''>('');
     const [status, setStatus] = useState<AuctionStatus | ''>('');
     const [sort, setSort] = useState('LATEST');
@@ -30,6 +32,35 @@ const AuctionList: React.FC = () => {
         }, 500);
         return () => clearTimeout(timer);
     }, [keyword]);
+
+    // Fetch recent searches
+    const fetchRecentSearches = async () => {
+        if (!api.isAuthenticated()) return;
+        try {
+            const data = await api.getRecentSearches();
+            setRecentSearches(data || []);
+        } catch (err) {
+            console.error("Failed to fetch recent searches", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchRecentSearches();
+    }, []);
+
+    const handleDeleteRecent = async (term: string) => {
+        try {
+            await api.deleteRecentSearch(term);
+            setRecentSearches(prev => prev.filter(t => t !== term));
+        } catch (err) { }
+    };
+
+    const handleClearAll = async () => {
+        try {
+            await api.deleteAllRecentSearches();
+            setRecentSearches([]);
+        } catch (err) { }
+    };
 
     // Sync category from URL
     useEffect(() => {
@@ -47,6 +78,8 @@ const AuctionList: React.FC = () => {
 
     useEffect(() => {
         fetchData();
+        // After search, refresh recent searches list 
+        if (debouncedKeyword) fetchRecentSearches();
     }, [debouncedKeyword, category, status, sort, page]);
 
     const fetchData = async () => {
@@ -90,13 +123,56 @@ const AuctionList: React.FC = () => {
                 <div style={{ flex: 1 }}>
                     <h1 style={{ marginBottom: '1rem' }}>경매 상품</h1>
                     <div className={classes.searchBar}>
-                        <input
-                            type="text"
-                            placeholder="상품 검색..."
-                            className={classes.searchInput}
-                            value={keyword}
-                            onChange={(e) => setKeyword(e.target.value)}
-                        />
+                        <div className={classes.searchContainer}>
+                            <input
+                                type="text"
+                                placeholder="상품 검색..."
+                                className={classes.searchInput}
+                                value={keyword}
+                                onChange={(e) => setKeyword(e.target.value)}
+                                onFocus={() => setShowRecent(true)}
+                            />
+                            {showRecent && (
+                                <div className={classes.recentSearches} onMouseLeave={() => setShowRecent(false)}>
+                                    <div className={classes.recentHeader}>
+                                        <span className={classes.recentTitle}>최근 검색어</span>
+                                        {recentSearches.length > 0 && (
+                                            <button className={classes.clearAllBtn} onClick={handleClearAll}>
+                                                전체 삭제
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className={classes.recentList}>
+                                        {recentSearches.length > 0 ? (
+                                            recentSearches.map((term) => (
+                                                <div key={term} className={classes.recentItem}>
+                                                    <span
+                                                        className={classes.recentLabel}
+                                                        onClick={() => {
+                                                            setKeyword(term);
+                                                            setShowRecent(false);
+                                                        }}
+                                                    >
+                                                        {term}
+                                                    </span>
+                                                    <button
+                                                        className={classes.removeBtn}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteRecent(term);
+                                                        }}
+                                                    >
+                                                        &times;
+                                                    </button>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className={classes.emptyRecent}>최근 검색어가 없습니다.</div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../services/api';
 import { type AuctionItem } from '../../types';
 import { type UserDetail } from '../../services/api.interface';
@@ -13,7 +13,28 @@ import NotificationSettings from './NotificationSettings';
 type Tab = 'wishlist' | 'orders' | 'bids' | 'history' | 'profile' | 'wallet' | 'notifications';
 
 const MyPage: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<Tab>('wishlist');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const tabParam = searchParams.get('tab') as Tab;
+
+    // Initialize activeTab from URL or default to 'wishlist'
+    const [activeTab, setActiveTabInternal] = useState<Tab>(
+        (tabParam && ['wishlist', 'orders', 'bids', 'history', 'profile', 'wallet', 'notifications'].includes(tabParam))
+            ? tabParam
+            : 'wishlist'
+    );
+
+    const setActiveTab = (tab: Tab) => {
+        setActiveTabInternal(tab);
+        setSearchParams({ tab });
+    };
+
+    // Sync tab with URL parameter if it changes externally
+    useEffect(() => {
+        if (tabParam && tabParam !== activeTab && ['wishlist', 'orders', 'bids', 'history', 'profile', 'wallet', 'notifications'].includes(tabParam)) {
+            setActiveTabInternal(tabParam);
+        }
+    }, [tabParam]);
+
     const [userInfo, setUserInfo] = useState<UserDetail | null>(null);
     const [wishlistItems, setWishlistItems] = useState<AuctionItem[]>([]);
     const [orders, setOrders] = useState<any[]>([]);

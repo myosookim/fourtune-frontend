@@ -645,5 +645,25 @@ export const mockApi: ApiService = {
     registerFcmToken: async (token: string) => {
         await delay(500);
         console.log(`Mock: FCM Token registered: ${token}`);
+    },
+
+    // Recent Search Mock
+    getRecentSearches: async () => {
+        await delay(300);
+        const saved = localStorage.getItem('recent_searches');
+        return saved ? JSON.parse(saved) : ['LG TV', 'iPhone 15', 'Macbook Pro'];
+    },
+
+    deleteRecentSearch: async (keyword: string) => {
+        await delay(300);
+        const saved = localStorage.getItem('recent_searches');
+        let searches: string[] = saved ? JSON.parse(saved) : ['LG TV', 'iPhone 15', 'Macbook Pro'];
+        searches = searches.filter(k => k !== keyword);
+        localStorage.setItem('recent_searches', JSON.stringify(searches));
+    },
+
+    deleteAllRecentSearches: async () => {
+        await delay(300);
+        localStorage.setItem('recent_searches', JSON.stringify([]));
     }
 };

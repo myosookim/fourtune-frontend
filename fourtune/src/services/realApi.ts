@@ -457,6 +457,20 @@ export const realApi: ApiService = {
 
     registerFcmToken: async (token: string) => {
         await client.post('/api/v1/notifications/token', { token });
+    },
+
+    // Recent Search Implementation
+    getRecentSearches: async () => {
+        const response = await client.get('/api/v1/search/recent');
+        return response.data.data; // ApiResponse<List<String>>
+    },
+
+    deleteRecentSearch: async (keyword: string) => {
+        await client.delete('/api/v1/search/recent', { params: { keyword } });
+    },
+
+    deleteAllRecentSearches: async () => {
+        await client.delete('/api/v1/search/recent/all');
     }
 };
 

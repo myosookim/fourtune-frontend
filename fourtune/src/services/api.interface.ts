@@ -151,6 +151,11 @@ export interface ApiService {
     getNotificationSettings(): Promise<NotificationSettingsResponse>;
     updateNotificationSettings(settings: NotificationSettingsResponse): Promise<void>;
     registerFcmToken(token: string): Promise<void>;
+
+    // Recent Search
+    getRecentSearches(): Promise<string[]>;
+    deleteRecentSearch(keyword: string): Promise<void>;
+    deleteAllRecentSearches(): Promise<void>;
 }
 
 export interface OrderDetailResponse {
