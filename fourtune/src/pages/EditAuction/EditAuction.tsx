@@ -226,6 +226,7 @@ const EditAuction: React.FC = () => {
                                 className={classes.input}
                                 value={formData.startAt}
                                 onChange={handleInputChange}
+                                disabled
                                 required
                             />
                         </div>
