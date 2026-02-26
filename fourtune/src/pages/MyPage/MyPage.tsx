@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { api } from '../../services/api';
-import { type AuctionItem } from '../../types';
+import { type AuctionItem, AuctionStatus } from '../../types';
 import { type UserDetail } from '../../services/api.interface';
 import { AuctionCard } from '../../components/features/AuctionCard';
 import classes from './MyPage.module.css';
@@ -284,9 +284,11 @@ const MyPage: React.FC = () => {
                             item={item}
                             actions={
                                 <>
-                                    <button onClick={() => navigate(`/auctions/edit/${item.auctionItemId}`)} className={classes.actionBtnSmall}>
-                                        수정
-                                    </button>
+                                    {![AuctionStatus.ENDED, AuctionStatus.SOLD, AuctionStatus.SOLD_BY_BUY_NOW, AuctionStatus.CANCELLED].includes(item.status as any) && (
+                                        <button onClick={() => navigate(`/auctions/edit/${item.auctionItemId}`)} className={classes.actionBtnSmall}>
+                                            수정
+                                        </button>
+                                    )}
                                     <button onClick={() => handleDeleteAuction(item.auctionItemId)} className={classes.dangerBtnSmall}>
                                         삭제
                                     </button>

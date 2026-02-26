@@ -43,6 +43,14 @@ const EditAuction: React.FC = () => {
                         return;
                     }
 
+                    // Check if auction is finished
+                    const finishedStatuses = ['ENDED', 'SOLD', 'SOLD_BY_BUY_NOW', 'CANCELLED'];
+                    if (finishedStatuses.includes(data.status)) {
+                        alert('종료된 경매는 수정할 수 없습니다.');
+                        navigate(-1);
+                        return;
+                    }
+
                     setFormData({
                         title: data.title,
                         description: data.description,
@@ -151,11 +159,15 @@ const EditAuction: React.FC = () => {
                             value={formData.category}
                             onChange={handleInputChange}
                             required
+                            disabled={auctionStatus === 'ACTIVE'}
                         >
                             {Object.values(AuctionCategory).map(c => (
                                 <option key={c} value={c}>{AUCTION_CATEGORY_KO[c]}</option>
                             ))}
                         </select>
+                        {auctionStatus === 'ACTIVE' && (
+                            <p className={classes.hint}>진행 중인 경매의 카테고리는 변경할 수 없습니다.</p>
+                        )}
                     </div>
 
                     <div className={classes.formRow}>
@@ -170,7 +182,11 @@ const EditAuction: React.FC = () => {
                                 onChange={handleInputChange}
                                 min="1"
                                 required
+                                disabled={auctionStatus === 'ACTIVE'}
                             />
+                            {auctionStatus === 'ACTIVE' && (
+                                <p className={classes.hint}>진행 중인 경매의 시작가는 변경할 수 없습니다.</p>
+                            )}
                         </div>
 
                         <div className={classes.formGroup}>
@@ -183,7 +199,11 @@ const EditAuction: React.FC = () => {
                                 value={formData.bidUnit || ''}
                                 onChange={handleInputChange}
                                 min="1"
+                                disabled={auctionStatus === 'ACTIVE'}
                             />
+                            {auctionStatus === 'ACTIVE' && (
+                                <p className={classes.hint}>진행 중인 경매의 입찰 단위는 변경할 수 없습니다.</p>
+                            )}
                         </div>
                     </div>
 
