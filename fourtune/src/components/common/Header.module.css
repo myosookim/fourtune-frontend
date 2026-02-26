@@ -52,8 +52,31 @@
 }
 
 .nav a:hover,
-.navSearch:hover {
+.navSearch:hover,
+.navWithIcon:hover {
     color: var(--color-primary);
+}
+
+.navWithIcon {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.navIcon {
+    margin-bottom: 1px;
+    /* 미세 정렬 */
+}
+
+.cartInAuth {
+    margin-right: 4px;
+    display: flex;
+    align-items: center;
+    color: var(--color-text-muted) !important;
+}
+
+.cartInAuth:hover {
+    color: var(--color-primary) !important;
 }
 
 .authButtons {

@@ -6,6 +6,7 @@ import { type AuctionItem, AuctionStatus } from '../../types';
 import { AUCTION_STATUS_KO, AUCTION_CATEGORY_KO } from '../../constants/translations';
 import { DEFAULT_AUCTION_IMAGE } from '../../constants/images';
 import classes from './AuctionDetail.module.css';
+import { AppIcon } from '../../components/common/Icon/AppIcon';
 
 const AuctionDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -298,13 +299,13 @@ const AuctionDetail: React.FC = () => {
 
                     <div className={classes.statsContainer}>
                         <div className={classes.statItem} title="조회수">
-                            <span className={classes.statIcon}>👁️</span> {item.viewCount ? item.viewCount.toLocaleString() : 0}
+                            <AppIcon name="eye" size={18} className={classes.statIcon} /> {item.viewCount ? item.viewCount.toLocaleString() : 0}
                         </div>
                         <div className={classes.statItem} title="관심 등록 수">
-                            <span className={classes.statIcon}>❤️</span> {item.watchlistCount ? item.watchlistCount.toLocaleString() : 0}
+                            <AppIcon name="heart" size={18} className={classes.statIcon} /> {item.watchlistCount ? item.watchlistCount.toLocaleString() : 0}
                         </div>
                         <div className={classes.statItem} title="입찰 수">
-                            <span className={classes.statIcon}>🔨</span> {item.bidCount ? item.bidCount.toLocaleString() : 0}
+                            <AppIcon name="bid-cursor" size={18} className={classes.statIcon} /> {item.bidCount ? item.bidCount.toLocaleString() : 0}
                         </div>
                     </div>
 
@@ -478,12 +479,9 @@ const AuctionDetail: React.FC = () => {
                             <button
                                 onClick={toggleWatchlist}
                                 className={`btn ${isWatchlisted ? 'btn-primary' : 'btn-outline'}`}
-                                style={{ width: '100%' }}
+                                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                             >
-                                {/* Heart Icon SVG */}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={isWatchlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '0.5rem' }}>
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                </svg>
+                                <AppIcon name="heart" size={20} color={isWatchlisted ? 'white' : 'currentColor'} />
                                 {isWatchlisted ? '관심상품 해제' : '관심상품 추가'}
                             </button>
                         </div>

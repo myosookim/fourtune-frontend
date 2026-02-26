@@ -1,5 +1,10 @@
 import React from 'react';
 import classes from './AppIcon.module.css';
+import heartIcon from '../../../assets/icons/heart.png';
+import bellIcon from '../../../assets/icons/bell.png';
+import eyeIcon from '../../../assets/icons/eye.png';
+import cartIcon from '../../../assets/icons/cart.png';
+import bidIcon from '../../../assets/icons/bid-cursor.png';
 
 /**
  * 아이콘 카테고리 정의
@@ -7,13 +12,15 @@ import classes from './AppIcon.module.css';
 export type IconCategory = 'action' | 'status' | 'ui';
 
 /**
- * 아이콘 이름 정의 (향후 추가될 아이콘 명칭들)
+ * 아이콘 이름 정의
  */
 export type IconName =
     | 'heart' | 'heart-filled'  // 찜하기
     | 'eye'                   // 조회수
     | 'bell' | 'bell-active'    // 알림
-    | 'hammer'                 // 입찰
+    | 'cart'                  // 장바구니
+    | 'bid-cursor'            // 입찰 커서
+    | 'hammer'                 // 입찰(망치)
     | 'search'                 // 검색
     | 'user'                   // 프로필
     | 'clock';                 // 시간
@@ -25,6 +32,7 @@ interface AppIconProps {
     className?: string;
     onClick?: (e: React.MouseEvent) => void;
     color?: string;
+    title?: string;
 }
 
 /**
@@ -37,12 +45,25 @@ export const AppIcon: React.FC<AppIconProps> = ({
     size = 20,
     className = '',
     onClick,
-    color
+    color,
+    title
 }) => {
-    // 1. 추후 PNG 파일로 교체 시 사용할 매핑 로직 (예시)
-    // const iconPath = `/src/assets/icons/${category}/${name}.png`;
+    /**
+     * 이미지 기반 아이콘 소스 매핑
+     */
+    const getIconSource = (iconName: IconName): string | null => {
+        switch (iconName) {
+            case 'heart':
+            case 'heart-filled': return heartIcon;
+            case 'eye': return eyeIcon;
+            case 'bell':
+            case 'bell-active': return bellIcon;
+            case 'cart': return cartIcon;
+            case 'bid-cursor': return bidIcon;
+            default: return null;
+        }
+    };
 
-    // 2. 현재는 과도기 단계로, 이모티콘이나 폰트 아이콘 기반으로 동작하도록 구성
     const getPlaceholderEmoji = (iconName: IconName): string => {
         switch (iconName) {
             case 'heart': return '🤍';
@@ -50,6 +71,8 @@ export const AppIcon: React.FC<AppIconProps> = ({
             case 'eye': return '👁️';
             case 'bell': return '🔔';
             case 'bell-active': return '🔕';
+            case 'cart': return '🛒';
+            case 'bid-cursor': return '🖱️';
             case 'hammer': return '🔨';
             case 'search': return '🔍';
             case 'user': return '👤';
@@ -57,6 +80,8 @@ export const AppIcon: React.FC<AppIconProps> = ({
             default: return '❓';
         }
     };
+
+    const iconSrc = getIconSource(name);
 
     const style: React.CSSProperties = {
         fontSize: size,
@@ -77,12 +102,22 @@ export const AppIcon: React.FC<AppIconProps> = ({
             onClick={onClick}
             role="img"
             aria-label={name}
+            data-tooltip={title}
         >
-            {/* 
-                추후 PNG 적용 시 아래 주석 해제:
-                <img src={iconPath} alt={name} style={{ width: '100%', height: '100%' }} />
-            */}
-            {getPlaceholderEmoji(name)}
+            {iconSrc ? (
+                <img
+                    src={iconSrc}
+                    alt={name}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        filter: color ? `drop-shadow(0 0 0 ${color})` : undefined // 단순 색상 적용은 이미지에선 제한적임
+                    }}
+                />
+            ) : (
+                getPlaceholderEmoji(name)
+            )}
         </span>
     );
 };

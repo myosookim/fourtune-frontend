@@ -4,6 +4,7 @@ import classes from './Header.module.css';
 import { api } from '../../services/api';
 import { LOGO_IMAGE } from '../../constants/images';
 import NotificationDropdown from './NotificationDropdown';
+import { AppIcon } from './Icon/AppIcon';
 
 export const Header: React.FC = () => {
     const navigate = useNavigate();
@@ -55,18 +56,20 @@ export const Header: React.FC = () => {
                 </Link>
                 <nav className={classes.nav}>
                     <Link to="/auctions" className={classes.navSearch}>둘러보기</Link>
-                    <Link to="/cart">장바구니</Link>
                     <Link to="/settlement">정산</Link>
                     <Link to="/mypage">마이페이지</Link>
                     {isAuthenticated ? (
                         <div className={classes.authButtons}>
+                            <Link to="/cart" className={`${classes.navWithIcon} ${classes.cartInAuth}`}>
+                                <AppIcon name="cart" size={20} title="장바구니" />
+                            </Link>
                             <div className={classes.notificationContainer}>
                                 <button
                                     className={classes.notificationWrapper}
                                     title="알림"
                                     onClick={() => setShowNotifications(!showNotifications)}
                                 >
-                                    <span className={classes.bellIcon}>🔔</span>
+                                    <AppIcon name="bell" size={20} title="알림" />
                                     {unreadCount > 0 && (
                                         <span className={classes.badge}>
                                             {unreadCount > 99 ? '99+' : unreadCount}

@@ -4,6 +4,7 @@ import { type AuctionItem, AuctionStatus } from '../../types';
 import { AUCTION_STATUS_KO, AUCTION_CATEGORY_KO } from '../../constants/translations';
 import { DEFAULT_AUCTION_IMAGE } from '../../constants/images';
 import classes from './AuctionCard.module.css';
+import { AppIcon } from '../common/Icon/AppIcon';
 
 interface AuctionCardProps {
     item: AuctionItem;
@@ -49,13 +50,13 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({ item, actions }) => {
             <div className={classes.footer}>
                 <div className={classes.statsRow}>
                     <div className={classes.statItem} title="조회수">
-                        <span>👁️</span> {item.viewCount || 0}
+                        <AppIcon name="eye" size={14} className={classes.statIcon} /> {item.viewCount || 0}
                     </div>
                     <div className={classes.statItem} title="관심">
-                        <span>❤️</span> {item.watchlistCount || 0}
+                        <AppIcon name="heart" size={14} className={classes.statIcon} /> {item.watchlistCount || 0}
                     </div>
                     <div className={classes.statItem} title="입찰">
-                        <span>🔨</span> {item.bidCount || 0}
+                        <AppIcon name="bid-cursor" size={14} className={classes.statIcon} /> {item.bidCount || 0}
                     </div>
                 </div>
                 {actions && (
