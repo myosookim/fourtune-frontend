@@ -5,6 +5,7 @@ import bellIcon from '../../../assets/icons/bell.png';
 import eyeIcon from '../../../assets/icons/eye.png';
 import cartIcon from '../../../assets/icons/cart.png';
 import bidIcon from '../../../assets/icons/bid-cursor.png';
+import menuIcon from '../../../assets/icons/menu.png';
 
 /**
  * 아이콘 카테고리 정의
@@ -23,7 +24,8 @@ export type IconName =
     | 'hammer'                 // 입찰(망치)
     | 'search'                 // 검색
     | 'user'                   // 프로필
-    | 'clock';                 // 시간
+    | 'clock'                  // 시간
+    | 'menu';                  // 메뉴
 
 interface AppIconProps {
     name: IconName;
@@ -60,6 +62,7 @@ export const AppIcon: React.FC<AppIconProps> = ({
             case 'bell-active': return bellIcon;
             case 'cart': return cartIcon;
             case 'bid-cursor': return bidIcon;
+            case 'menu': return menuIcon;
             default: return null;
         }
     };

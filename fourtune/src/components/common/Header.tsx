@@ -55,7 +55,6 @@ export const Header: React.FC = () => {
                     )}
                 </Link>
                 <nav className={classes.nav}>
-                    <Link to="/auctions" className={classes.navSearch}>둘러보기</Link>
                     <Link to="/settlement">정산</Link>
                     <Link to="/mypage">마이페이지</Link>
                     {isAuthenticated ? (
