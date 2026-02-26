@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import classes from './Header.module.css';
 import { api } from '../../services/api';
+import { LOGO_IMAGE } from '../../constants/images';
 import NotificationDropdown from './NotificationDropdown';
 
 export const Header: React.FC = () => {
@@ -46,7 +47,11 @@ export const Header: React.FC = () => {
         <header className={classes.header}>
             <div className={`container ${classes.container}`}>
                 <Link to="/" className={classes.logo}>
-                    CLOV4R
+                    {LOGO_IMAGE ? (
+                        <img src={LOGO_IMAGE} alt="CLOV4R" className={classes.logoImage} />
+                    ) : (
+                        "CLOV4R"
+                    )}
                 </Link>
                 <nav className={classes.nav}>
                     <Link to="/auctions" className={classes.navSearch}>둘러보기</Link>

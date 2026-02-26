@@ -1,10 +1,13 @@
 .header {
     background-color: var(--color-bg-surface);
     border-bottom: 1px solid var(--color-border);
-    padding: 1rem 0;
+    padding: 0.5rem 0;
+    /* 패딩 감소로 헤더 바 높이 슬림화 */
     position: sticky;
     top: 0;
     z-index: 1100;
+    height: 64px;
+    /* 헤더 높이 고정 */
 }
 
 .container {
@@ -14,10 +17,26 @@
 }
 
 .logo {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--color-primary);
-    letter-spacing: -0.05em;
+    display: flex;
+    align-items: center;
+    position: relative;
+    /* 자식 요소인 logoImage의 기준점 */
+    width: 200px;
+    /* 로고가 차지할 공간 확보 */
+    height: 48px;
+    text-decoration: none;
+}
+
+.logoImage {
+    height: 32px;
+    /* 로고 크기는 충분히 크게 */
+    width: auto;
+    object-fit: contain;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    /* 헤더 바를 키우지 않고 중앙 정렬 */
 }
 
 .nav {
