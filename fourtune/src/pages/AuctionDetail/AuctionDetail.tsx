@@ -4,6 +4,7 @@ import { api } from '../../services/api';
 import { type OrderDetailResponse } from '../../services/api.interface';
 import { type AuctionItem, AuctionStatus } from '../../types';
 import { AUCTION_STATUS_KO, AUCTION_CATEGORY_KO } from '../../constants/translations';
+import { DEFAULT_AUCTION_IMAGE } from '../../constants/images';
 import classes from './AuctionDetail.module.css';
 
 const AuctionDetail: React.FC = () => {
@@ -11,7 +12,7 @@ const AuctionDetail: React.FC = () => {
     const navigate = useNavigate();
     const [item, setItem] = useState<AuctionItem | null>(null);
     const [loading, setLoading] = useState(true);
-    const [selectedImage, setSelectedImage] = useState<string>('');
+    const [selectedImage, setSelectedImage] = useState<string>(DEFAULT_AUCTION_IMAGE);
     const [error, setError] = useState('');
     const [isWatchlisted, setIsWatchlisted] = useState(false);
     // Order status check for Buy Now
@@ -36,6 +37,8 @@ const AuctionDetail: React.FC = () => {
                     // 1. Initial Image Setup
                     if (data.imageUrls && data.imageUrls.length > 0) {
                         setSelectedImage(data.imageUrls[0]);
+                    } else {
+                        setSelectedImage(DEFAULT_AUCTION_IMAGE);
                     }
 
                     // 2. Watchlist Check - Check Server State
@@ -270,19 +273,21 @@ const AuctionDetail: React.FC = () => {
                 {/* Left: Images */}
                 <div className={classes.imageSection}>
                     <div className={classes.mainImageContainer}>
-                        {selectedImage && <img src={selectedImage} alt={item.title} className={classes.mainImage} />}
+                        <img src={selectedImage} alt={item.title} className={classes.mainImage} />
                     </div>
-                    <div className={classes.thumbnailGrid}>
-                        {item.imageUrls.map((url, idx) => (
-                            <div
-                                key={idx}
-                                className={`${classes.thumbnail} ${selectedImage === url ? classes.active : ''}`}
-                                onClick={() => setSelectedImage(url)}
-                            >
-                                <img src={url} alt={`Thumbnail ${idx + 1}`} />
-                            </div>
-                        ))}
-                    </div>
+                    {item.imageUrls && item.imageUrls.length > 0 && (
+                        <div className={classes.thumbnailGrid}>
+                            {item.imageUrls.map((url, idx) => (
+                                <div
+                                    key={idx}
+                                    className={`${classes.thumbnail} ${selectedImage === url ? classes.active : ''}`}
+                                    onClick={() => setSelectedImage(url)}
+                                >
+                                    <img src={url} alt={`Thumbnail ${idx + 1}`} />
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Right: Info */}

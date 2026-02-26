@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { type AuctionItem, AuctionStatus } from '../../types';
 import { AUCTION_STATUS_KO, AUCTION_CATEGORY_KO } from '../../constants/translations';
+import { DEFAULT_AUCTION_IMAGE } from '../../constants/images';
 import classes from './AuctionCard.module.css';
 
 interface AuctionCardProps {
@@ -23,11 +24,15 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({ item, actions }) => {
         }
     };
 
+    const imageUrl = (item.imageUrls && item.imageUrls.length > 0)
+        ? item.imageUrls[0]
+        : DEFAULT_AUCTION_IMAGE;
+
     return (
         <div className={classes.card}>
             <Link to={`/auctions/${item.auctionItemId}`} className={classes.mainLink}>
                 <div className={classes.imageContainer}>
-                    <img src={item.imageUrls[0]} alt={item.title} className={classes.image} loading="lazy" />
+                    <img src={imageUrl} alt={item.title} className={classes.image} loading="lazy" />
                     <span className={`${classes.badge} ${getStatusBadge(item.status)}`}>
                         {AUCTION_STATUS_KO[item.status]}
                     </span>
