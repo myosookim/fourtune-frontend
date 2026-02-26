@@ -100,7 +100,7 @@ export interface ApiService {
     updateAuction(id: number, data: Partial<CreateAuctionRequest>, images?: File[]): Promise<AuctionItem>;
     deleteAuction(id: number): Promise<void>;
     increaseViewCount(auctionId: number): Promise<void>;
-    toggleWatchlist(auctionId: number): Promise<string>;
+    toggleWatchlist(auctionId: number): Promise<boolean>;
     getMyWatchlist(): Promise<number[]>;
 
     login(email: string, password?: string): Promise<{ user: { email: string; name: string } }>;

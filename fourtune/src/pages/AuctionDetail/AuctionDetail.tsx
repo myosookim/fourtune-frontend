@@ -188,14 +188,10 @@ const AuctionDetail: React.FC = () => {
             }
 
             // Sync with Server
-            const responseMessage = await api.toggleWatchlist(item.auctionItemId);
+            const isAdded = await api.toggleWatchlist(item.auctionItemId);
 
             // Server Response validation
-            // "관심상품에 등록되었습니다." means it is now ADDED.
-            // "관심상품이 해제되었습니다." means it is now REMOVED.
-            const serverSaysAdded = responseMessage.includes('등록되었습니다');
-
-            if (serverSaysAdded) {
+            if (isAdded) {
                 // Force UI match if we were wrong
                 if (!prevIsWatchlisted) {
                     // We optimistically added, and server added -> Good.
@@ -205,6 +201,7 @@ const AuctionDetail: React.FC = () => {
                     setIsWatchlisted(true);
                     // Count is trickier if we don't know the absolute truth, but trust optimistic if we match
                 }
+                alert('관심상품에 등록되었습니다.');
             } else {
                 // Force UI match if we were wrong
                 if (prevIsWatchlisted) {
@@ -213,9 +210,8 @@ const AuctionDetail: React.FC = () => {
                     // We optimistically added, server removed ??
                     setIsWatchlisted(false);
                 }
+                alert('관심상품이 해제되었습니다.');
             }
-
-            alert(responseMessage);
 
         } catch (e) {
             console.error('Failed to update watchlist', e);

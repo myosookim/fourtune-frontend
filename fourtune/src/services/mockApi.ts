@@ -159,17 +159,17 @@ export const mockApi: ApiService = {
                 // Sync LS
                 watchlist = watchlist.filter(id => id !== auctionId);
                 localStorage.setItem('watchlist', JSON.stringify(watchlist));
-                return "관심상품이 해제되었습니다.";
+                return false; // Removed
             } else {
                 // Like
                 auction.watchlistCount = count + 1;
                 // Sync LS
                 if (!watchlist.includes(auctionId)) watchlist.push(auctionId);
                 localStorage.setItem('watchlist', JSON.stringify(watchlist));
-                return "관심상품에 등록되었습니다.";
+                return true; // Added
             }
         }
-        return "";
+        return false;
     },
 
     getMyWatchlist: async () => {
