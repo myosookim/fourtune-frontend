@@ -43,6 +43,7 @@ export interface AuctionItem {
     sellerName?: string;
     sellerId?: number;
     buyNowPrice?: number;
+    buyNowEnabled?: boolean;
     bidUnit?: number;
     viewCount?: number;
     bidCount?: number;
