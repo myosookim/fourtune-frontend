@@ -249,7 +249,7 @@ export const realApi: ApiService = {
             console.error('Watchlist response is not an array:', data);
             return [];
         }
-        return data.map((item: any) => item.auctionItemId);
+        return data.map((item: any) => item.itemId);
     },
 
     login: async (email, password) => {
