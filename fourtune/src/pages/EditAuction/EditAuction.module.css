@@ -14,13 +14,16 @@
 .header {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    justify-content: center;
+    position: relative;
     margin-bottom: 2rem;
     border-bottom: 2px solid #f1f3f5;
     padding-bottom: 1rem;
 }
 
 .backButton {
+    position: absolute;
+    left: 0;
     white-space: nowrap;
 }
 
