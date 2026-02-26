@@ -13,6 +13,7 @@ const EditAuction: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [images, setImages] = useState<File[]>([]);
     const [isBuyNowEnabled, setIsBuyNowEnabled] = useState(false);
+    const [auctionStatus, setAuctionStatus] = useState<string>('');
     const [formData, setFormData] = useState<CreateAuctionRequest>({
         title: '',
         description: '',
@@ -52,6 +53,7 @@ const EditAuction: React.FC = () => {
                         startAt: data.startAt.slice(0, 16),
                         endAt: data.endAt.slice(0, 16),
                     });
+                    setAuctionStatus(data.status);
                     setIsBuyNowEnabled(!!data.buyNowPrice && data.buyNowPrice > 0);
                 })
                 .catch(err => {
@@ -226,9 +228,16 @@ const EditAuction: React.FC = () => {
                                 className={classes.input}
                                 value={formData.startAt}
                                 onChange={handleInputChange}
-                                disabled
+                                disabled={auctionStatus !== 'SCHEDULED'}
                                 required
                             />
+                            {auctionStatus && auctionStatus !== 'SCHEDULED' && (
+                                <p className={classes.hint}>
+                                    {auctionStatus === 'ACTIVE'
+                                        ? '진행 중인 경매의 시작 시간은 변경할 수 없습니다.'
+                                        : '종료된 경매의 시작 시간은 변경할 수 없습니다.'}
+                                </p>
+                            )}
                         </div>
 
                         <div className={classes.formGroup}>
