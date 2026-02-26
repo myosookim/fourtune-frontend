@@ -238,16 +238,18 @@ export const realApi: ApiService = {
 
     toggleWatchlist: async (auctionId: number) => {
         const response = await client.post('/api/v1/watch-lists/toggle', { auctionItemId: auctionId });
-        return response.data; // Returns message string
+        return response.data; // Returns boolean (isAdded)
     },
 
     getMyWatchlist: async () => {
         const response = await client.get('/api/v1/watch-lists');
         // response.data is List<WatchListResponseDto>
-        // assume WatchListResponseDto has auctionItemId or id
-        // let's verify DTO. but usually it's list of objects.
-        // assuming user wants IDs to check inclusion.
-        return response.data.map((item: any) => item.auctionItemId);
+        const data = response.data || [];
+        if (!Array.isArray(data)) {
+            console.error('Watchlist response is not an array:', data);
+            return [];
+        }
+        return data.map((item: any) => item.auctionItemId);
     },
 
     login: async (email, password) => {
