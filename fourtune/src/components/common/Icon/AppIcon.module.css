@@ -1,0 +1,15 @@
+.iconWrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.iconWrapper:hover {
+    transform: scale(1.1);
+}
+
+.iconWrapper:active {
+    transform: scale(0.95);
+}
