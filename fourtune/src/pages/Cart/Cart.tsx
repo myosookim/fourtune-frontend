@@ -121,8 +121,8 @@ const Cart: React.FC = () => {
             if (orderIds.length === 1) {
                 navigate(`/payment?orderId=${orderIds[0]}`);
             } else if (orderIds.length > 1) {
-                alert(`${orderIds.length}개의 주문이 생성되었습니다. 결제를 진행해주세요.`);
-                navigate('/my/purchase-history');
+                alert(`${orderIds.length}개의 주문이 생성되었습니다. 내 주문 목록에서 결제를 진행해주세요.`);
+                navigate('/my/orders');
             } else {
                 alert('주문 생성에 실패했습니다 (No ID returned).');
             }
