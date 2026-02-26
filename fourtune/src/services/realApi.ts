@@ -64,6 +64,46 @@ export const realApi: ApiService = {
         };
     },
 
+    getMyAuctions: async (params = {}) => {
+        const queryParams: any = {
+            page: params.page || 0,
+            size: params.size || 20,
+        };
+        if (params.status) queryParams.status = params.status;
+
+        const response = await client.get('/api/v1/auctions/me', { params: queryParams });
+        const data = response.data;
+
+        const content = (data.content || []).map((item: any) => ({
+            auctionItemId: item.id ?? item.auctionItemId,
+            title: item.title,
+            description: item.description,
+            category: item.category,
+            status: item.status,
+            startPrice: item.startPrice,
+            currentPrice: item.currentPrice,
+            startAt: item.auctionStartTime || item.startAt || '',
+            endAt: item.auctionEndTime || item.endAt || '',
+            imageUrls: item.thumbnailUrl ? [item.thumbnailUrl] : (item.imageUrls || []),
+            createdAt: item.createdAt || '',
+            updatedAt: item.updatedAt || '',
+            sellerName: item.sellerNickname || item.sellerName,
+            sellerId: item.sellerId,
+            buyNowPrice: item.buyNowPrice,
+            viewCount: item.viewCount,
+            bidCount: item.bidCount,
+            watchlistCount: item.watchlistCount,
+        }));
+
+        return {
+            content,
+            page: data.pageable?.pageNumber ?? 0,
+            size: data.size ?? queryParams.size,
+            totalElements: data.totalElements ?? content.length,
+            totalPages: data.totalPages ?? 1,
+        };
+    },
+
     getAuctionById: async (id: number) => {
         const response = await client.get(`/api/v1/auctions/${id}`);
         const data = response.data;

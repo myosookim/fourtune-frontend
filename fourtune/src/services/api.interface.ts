@@ -94,6 +94,12 @@ export interface ApiService {
         sellerName?: string;
     }): Promise<SearchResponse>;
 
+    getMyAuctions(params?: {
+        status?: AuctionStatus;
+        page?: number;
+        size?: number;
+    }): Promise<SearchResponse>;
+
     getAuctionById(id: number): Promise<AuctionItem>;
 
     createAuction(data: CreateAuctionRequest, images?: File[]): Promise<AuctionItem>;

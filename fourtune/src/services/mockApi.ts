@@ -77,6 +77,19 @@ export const mockApi: ApiService = {
         };
     },
 
+    getMyAuctions: async (params = {}) => {
+        await delay(300);
+        const currentUser = mockApi.getCurrentUser();
+        const filtered = MOCK_AUCTIONS.filter(a =>
+            a.sellerName === currentUser?.name &&
+            (!params.status || a.status === params.status)
+        );
+        const page = params.page || 0;
+        const size = params.size || 20;
+        const content = filtered.slice(page * size, (page + 1) * size);
+        return { content, page, size, totalElements: filtered.length, totalPages: Math.ceil(filtered.length / size) };
+    },
+
     getAuctionById: async (id: number) => {
         await delay(500);
         const item = MOCK_AUCTIONS.find(a => a.auctionItemId === id);

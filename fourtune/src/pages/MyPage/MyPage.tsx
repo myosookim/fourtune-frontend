@@ -120,7 +120,7 @@ const MyPage: React.FC = () => {
     const fetchMyAuctions = async () => {
         setLoading(true);
         try {
-            const data = await api.searchAuctions({ sellerName: api.getCurrentUser()?.name });
+            const data = await api.getMyAuctions({ size: 100 });
             setMyAuctions(data.content);
         } catch (e) { console.error(e); }
         finally { setLoading(false); }
