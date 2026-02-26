@@ -126,7 +126,7 @@ const AuctionDetail: React.FC = () => {
 
         try {
             const orderId = await api.buyNow(item.auctionItemId);
-            navigate(`/ payment ? orderId = ${orderId} `);
+            navigate(`/payment?orderId=${orderId}`);
         } catch (error: any) {
             console.error('Buy now failed', error);
 
@@ -420,7 +420,7 @@ const AuctionDetail: React.FC = () => {
                                         <button
                                             id="bidSubmitBtn"
                                             onClick={handleBidClick}
-                                            className={`btn btn - primary ${classes.bidSubmitButton} `}
+                                            className={`btn btn-primary ${classes.bidSubmitButton} `}
                                         >
                                             {bidAmount.toLocaleString()}원 입찰하기
                                         </button>
@@ -429,10 +429,10 @@ const AuctionDetail: React.FC = () => {
                                     {/* Backend might send 0 or undefined if not set. Check strict positive constraint if needed */}
                                     {(item.buyNowPrice && item.buyNowPrice > 0) && (
                                         <>
-                                            <button onClick={handleBuyNow} className={`btn ${classes.buyNowButton} `}>
+                                            <button onClick={handleBuyNow} className={`btn ${classes.buyNowButton}`}>
                                                 즉시 구매 ({item.buyNowPrice.toLocaleString()}원)
                                             </button>
-                                            <button onClick={handleAddToCart} className={`btn btn - outline`} style={{ minWidth: '100px' }}>
+                                            <button onClick={handleAddToCart} className={`btn btn-outline`} style={{ minWidth: '100px' }}>
                                                 장바구니
                                             </button>
                                         </>
@@ -440,14 +440,14 @@ const AuctionDetail: React.FC = () => {
                                 </>
                             )}
                             {(item.status === AuctionStatus.ACTIVE && new Date() > new Date(item.endAt)) && (
-                                <button disabled className={`btn btn - outline`} style={{ width: '100%', cursor: 'not-allowed' }}>
+                                <button disabled className={`btn btn-outline`} style={{ width: '100%', cursor: 'not-allowed' }}>
                                     경매 시간 종료 (마감됨)
                                 </button>
                             )}
                             {item.status === AuctionStatus.SOLD_BY_BUY_NOW && myOrder && myOrder.status === 'PENDING' && (
                                 <button
-                                    onClick={() => navigate(`/ payment ? orderId = ${myOrder.orderId} `)}
-                                    className={`btn btn - primary`}
+                                    onClick={() => navigate(`/payment?orderId=${myOrder?.orderId}`)}
+                                    className={`btn btn-primary`}
                                     style={{ width: '100%' }}
                                 >
                                     결제하기 (주문 대기중)
@@ -466,7 +466,7 @@ const AuctionDetail: React.FC = () => {
                                     )}
                                     <button
                                         onClick={handleDeleteAuction}
-                                        className={`btn btn - outline`}
+                                        className={`btn btn-outline`}
                                         style={{ flex: 1, color: '#fa5252', borderColor: '#fa5252' }}
                                     >
                                         삭제하기
@@ -476,7 +476,7 @@ const AuctionDetail: React.FC = () => {
 
                             <button
                                 onClick={toggleWatchlist}
-                                className={`btn ${isWatchlisted ? 'btn-primary' : 'btn-outline'} `}
+                                className={`btn ${isWatchlisted ? 'btn-primary' : 'btn-outline'}`}
                                 style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                             >
                                 <AppIcon name="heart" size={20} color={isWatchlisted ? 'white' : 'currentColor'} />
