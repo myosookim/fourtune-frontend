@@ -28,6 +28,21 @@ const saveMockCartItems = (items: MockCartItem[]) => {
     localStorage.setItem(MOCK_CART_KEY, JSON.stringify(items));
 };
 
+const MOCK_ORDERS_KEY = 'mock_orders_v1';
+
+const getMockOrders = (): any[] => {
+    try {
+        const saved = localStorage.getItem(MOCK_ORDERS_KEY);
+        return saved ? JSON.parse(saved) : [];
+    } catch {
+        return [];
+    }
+};
+
+const saveMockOrders = (orders: any[]) => {
+    localStorage.setItem(MOCK_ORDERS_KEY, JSON.stringify(orders));
+};
+
 export const mockApi: ApiService = {
     searchAuctions: async (params) => {
         await delay(500);
@@ -350,24 +365,53 @@ export const mockApi: ApiService = {
     },
 
     // Mock Payment & Order
-    buyNow: async () => {
+    buyNow: async (auctionId: number) => {
         await delay(500);
-        return `MOCK_ORDER_${Date.now()}`;
+        const item = MOCK_AUCTIONS.find(a => a.auctionItemId === auctionId);
+        if (!item) throw new Error('Auction not found');
+
+        const orderId = `MOCK_ORDER_${Date.now()}`;
+        const newOrder = {
+            id: Date.now(),
+            orderId: orderId,
+            auctionId: item.auctionItemId,
+            auctionTitle: item.title,
+            thumbnailUrl: item.imageUrls[0] || '',
+            winnerId: mockApi.getCurrentUser()?.id || 1,
+            winnerNickname: mockApi.getCurrentUser()?.name || 'Me',
+            sellerId: item.sellerId || 2,
+            sellerNickname: item.sellerName || 'Seller',
+            finalPrice: item.buyNowPrice || item.currentPrice,
+            orderType: 'BUY_NOW',
+            status: 'PENDING',
+            createdAt: new Date().toISOString()
+        };
+
+        const orders = getMockOrders();
+        orders.push(newOrder);
+        saveMockOrders(orders);
+
+        return orderId;
     },
 
     getPublicOrder: async (orderId: string) => {
         await delay(500);
+        const orders = getMockOrders();
+        const order = orders.find(o => o.orderId === orderId);
+        if (order) return order;
+
+        // Fallback
         return {
             id: 12345,
             orderId: orderId,
             auctionId: 1,
             auctionTitle: 'Mock Auction Item',
-            thumbnailUrl: 'https://picsum.photos/200/300',
-            winnerId: 100,
-            winnerNickname: 'MockWinner',
-            sellerId: 200,
-            sellerNickname: 'MockSeller',
-            finalPrice: 10000,
+            thumbnailUrl: 'https://loremflickr.com/400/300/luxury?lock=1',
+            winnerId: 1,
+            winnerNickname: 'Winner',
+            sellerId: 2,
+            sellerNickname: 'Seller',
+            finalPrice: 100000,
             orderType: 'BUY_NOW',
             status: 'PENDING',
             createdAt: new Date().toISOString()
@@ -376,17 +420,21 @@ export const mockApi: ApiService = {
 
     getOrderByAuctionId: async (auctionId: number) => {
         await delay(500);
+        const orders = getMockOrders();
+        const order = orders.find(o => o.auctionId === auctionId);
+        if (order) return order;
+
         return {
             id: 12345,
             orderId: `ORDER_${auctionId}`,
             auctionId: auctionId,
             auctionTitle: 'Mock Auction Item',
-            thumbnailUrl: 'https://picsum.photos/200/300',
-            winnerId: 100,
-            winnerNickname: 'MockWinner',
-            sellerId: 200,
-            sellerNickname: 'MockSeller',
-            finalPrice: 10000,
+            thumbnailUrl: 'https://loremflickr.com/400/300/luxury?lock=1',
+            winnerId: 1,
+            winnerNickname: 'Winner',
+            sellerId: 2,
+            sellerNickname: 'Seller',
+            finalPrice: 100000,
             orderType: 'AUCTION_WIN',
             status: 'PENDING',
             createdAt: new Date().toISOString()
@@ -395,17 +443,21 @@ export const mockApi: ApiService = {
 
     getOrderById: async (orderId: string) => {
         await delay(500);
+        const orders = getMockOrders();
+        const order = orders.find(o => o.orderId === orderId);
+        if (order) return order;
+
         return {
             id: 12345,
             orderId: orderId,
             auctionId: 1,
             auctionTitle: 'Mock Auction Item',
-            thumbnailUrl: 'https://picsum.photos/200/300',
-            winnerId: 100,
-            winnerNickname: 'MockWinner',
-            sellerId: 200,
-            sellerNickname: 'MockSeller',
-            finalPrice: 10000,
+            thumbnailUrl: 'https://loremflickr.com/400/300/luxury?lock=1',
+            winnerId: 1,
+            winnerNickname: 'Winner',
+            sellerId: 2,
+            sellerNickname: 'Seller',
+            finalPrice: 100000,
             orderType: 'BUY_NOW',
             status: 'PENDING',
             createdAt: new Date().toISOString()
@@ -534,21 +586,82 @@ export const mockApi: ApiService = {
 
     buyNowFromCart: async (cartItemIds: number[]) => {
         await delay(1000);
-        console.log('Mock: Bought from cart', cartItemIds);
-        // Remove bought items
-        const items = getMockCartItems();
-        const filtered = items.filter(i => !cartItemIds.includes(i.id));
-        saveMockCartItems(filtered);
+        const cartItems = getMockCartItems();
+        const itemsToBuy = cartItems.filter(i => cartItemIds.includes(i.id));
 
-        return cartItemIds.map(id => `MOCK_ORDER_CART_${id}_${Date.now()}`);
+        const orderIds: string[] = [];
+        const orders = getMockOrders();
+
+        itemsToBuy.forEach(cartItem => {
+            const auction = MOCK_AUCTIONS.find(a => a.auctionItemId === cartItem.auctionId);
+            if (auction) {
+                const orderId = `MOCK_ORDER_CART_${cartItem.id}_${Date.now()}`;
+                orderIds.push(orderId);
+
+                orders.push({
+                    id: Date.now() + Math.random(),
+                    orderId: orderId,
+                    auctionId: auction.auctionItemId,
+                    auctionTitle: auction.title,
+                    thumbnailUrl: auction.imageUrls[0] || '',
+                    winnerId: mockApi.getCurrentUser()?.id || 1,
+                    winnerNickname: mockApi.getCurrentUser()?.name || 'Me',
+                    sellerId: auction.sellerId || 2,
+                    sellerNickname: auction.sellerName || 'Seller',
+                    finalPrice: cartItem.buyNowPrice,
+                    orderType: 'BUY_NOW',
+                    status: 'PENDING',
+                    createdAt: new Date().toISOString()
+                });
+            }
+        });
+
+        saveMockOrders(orders);
+
+        // Remove bought items from cart
+        const remainingItems = cartItems.filter(i => !cartItemIds.includes(i.id));
+        saveMockCartItems(remainingItems);
+
+        return orderIds;
     },
 
     buyNowAllCart: async () => {
         await delay(1000);
+        const cartItems = getMockCartItems();
+
+        const orderIds: string[] = [];
+        const orders = getMockOrders();
+
+        cartItems.forEach(cartItem => {
+            const auction = MOCK_AUCTIONS.find(a => a.auctionItemId === cartItem.auctionId);
+            if (auction) {
+                const orderId = `MOCK_ORDER_CART_ALL_${cartItem.id}_${Date.now()}`;
+                orderIds.push(orderId);
+
+                orders.push({
+                    id: Date.now() + Math.random(),
+                    orderId: orderId,
+                    auctionId: auction.auctionItemId,
+                    auctionTitle: auction.title,
+                    thumbnailUrl: auction.imageUrls[0] || '',
+                    winnerId: mockApi.getCurrentUser()?.id || 1,
+                    winnerNickname: mockApi.getCurrentUser()?.name || 'Me',
+                    sellerId: auction.sellerId || 2,
+                    sellerNickname: auction.sellerName || 'Seller',
+                    finalPrice: cartItem.buyNowPrice,
+                    orderType: 'BUY_NOW',
+                    status: 'PENDING',
+                    createdAt: new Date().toISOString()
+                });
+            }
+        });
+
+        saveMockOrders(orders);
+
         // Assume empty cart after buy all
         saveMockCartItems([]);
-        console.log('Mock: Bought all from cart');
-        return [`MOCK_ORDER_CART_ALL_${Date.now()}`];
+
+        return orderIds;
     },
 
     clearExpiredItems: async () => {
