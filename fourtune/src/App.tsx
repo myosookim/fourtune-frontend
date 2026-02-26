@@ -15,6 +15,7 @@ import OrderSheet from './pages/Order/OrderSheet';
 import MyOrders from './pages/MyPage/MyOrders';
 import SettlementPage from './pages/Settlement/Settlement';
 import LoginSuccess from './pages/Auth/LoginSuccess';
+import EditAuction from './pages/EditAuction/EditAuction';
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
                 <Route index element={<Home />} />
                 <Route path="auctions" element={<AuctionList />} />
                 <Route path="auctions/create" element={<CreateAuction />} />
+                <Route path="auctions/edit/:id" element={<EditAuction />} />
                 <Route path="auctions/:id" element={<AuctionDetail />} />
                 <Route path="cart" element={<Cart />} />
                 <Route path="settlement" element={<SettlementPage />} />

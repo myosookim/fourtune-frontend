@@ -91,14 +91,17 @@ export interface ApiService {
         category?: AuctionCategory;
         status?: AuctionStatus;
         sort?: string;
+        sellerName?: string;
     }): Promise<SearchResponse>;
 
     getAuctionById(id: number): Promise<AuctionItem>;
 
     createAuction(data: CreateAuctionRequest, images?: File[]): Promise<AuctionItem>;
+    updateAuction(id: number, data: Partial<CreateAuctionRequest>, images?: File[]): Promise<AuctionItem>;
+    deleteAuction(id: number): Promise<void>;
     increaseViewCount(auctionId: number): Promise<void>;
-    toggleWishlist(auctionId: number): Promise<string>;
-    getMyWishlist(): Promise<number[]>;
+    toggleWatchlist(auctionId: number): Promise<string>;
+    getMyWatchlist(): Promise<number[]>;
 
     login(email: string, password?: string): Promise<{ user: { email: string; name: string } }>;
     signup(nickname: string, email: string, password?: string, phoneNumber?: string): Promise<{ user: { email: string; name: string } }>;
@@ -114,6 +117,9 @@ export interface ApiService {
     placeBid(auctionId: number, bidAmount: number): Promise<BidDetailResponse>;
     getMyBids(): Promise<BidResponse[]>;
     getAuctionBids(auctionId: number): Promise<BidHistoryResponse>;
+    getHighestBid(auctionId: number): Promise<BidResponse>;
+    getBidById(bidId: number): Promise<BidResponse>;
+    cancelBid(bidId: number): Promise<void>;
 
     // Payment & Order
     buyNow(auctionId: number): Promise<string>; // Returns orderId
@@ -121,6 +127,7 @@ export interface ApiService {
     getOrderById(orderId: string): Promise<OrderDetailResponse>;
     getOrderByAuctionId(auctionId: number): Promise<OrderDetailResponse>;
     confirmPayment(paymentKey: string, orderId: string, amount: number): Promise<void>;
+    cancelOrder(orderId: string): Promise<void>;
     getMyOrders(): Promise<OrderResponse[]>;
 
     // Cart

@@ -46,13 +46,14 @@ export interface AuctionItem {
     bidUnit?: number;
     viewCount?: number;
     bidCount?: number;
-    wishlistCount?: number;
+    watchlistCount?: number;
 }
 
 export interface SearchResponse {
-    items: AuctionItem[];
+    content: AuctionItem[];
     page: number;
     size: number;
+    totalElements: number;
     totalPages: number;
 }
 

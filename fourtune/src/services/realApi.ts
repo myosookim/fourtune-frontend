@@ -22,7 +22,6 @@ export const realApi: ApiService = {
     searchAuctions: async (params) => {
         const queryParams: any = {
             keyword: params.keyword || undefined,
-            searchPriceRange: undefined, // Add if needed
             sort: params.sort || 'LATEST',
             page: (params.page || 0) + 1,
             size: params.size || 12,
@@ -30,12 +29,12 @@ export const realApi: ApiService = {
 
         if (params.category && (params.category as string) !== '') queryParams.categories = params.category;
         if (params.status && (params.status as string) !== '') queryParams.statuses = params.status;
+        if (params.sellerName) queryParams.sellerName = params.sellerName;
 
         const response = await client.get('/api/v1/search/auction-items', { params: queryParams });
         const data = response.data; // SearchResultPage
 
-        // Map backend SearchAuctionItemView to frontend AuctionItem interface
-        const items = data.items.map((item: any) => ({
+        const content = (data.items || []).map((item: any) => ({
             auctionItemId: item.auctionItemId,
             title: item.title,
             description: item.description,
@@ -45,7 +44,7 @@ export const realApi: ApiService = {
             currentPrice: item.currentPrice,
             startAt: item.startAt || '',
             endAt: item.endAt || '',
-            imageUrls: item.thumbnailUrl ? [item.thumbnailUrl] : [], // Map thumbnail to array
+            imageUrls: item.thumbnailUrl ? [item.thumbnailUrl] : [],
             createdAt: item.createdAt || '',
             updatedAt: item.updatedAt || '',
             sellerName: item.sellerName,
@@ -53,15 +52,15 @@ export const realApi: ApiService = {
             buyNowPrice: item.buyNowPrice,
             viewCount: item.viewCount,
             bidCount: item.bidCount,
-            wishlistCount: item.wishlistCount,
-            // Additional fields from ES view if needed in UI: viewCount, etc.
+            watchlistCount: item.wishlistCount,
         }));
 
         return {
-            items,
-            page: data.page - 1,   // Convert back to 0-based
+            content,
+            page: data.page - 1,
             size: data.size,
-            totalPages: Math.ceil(data.totalElements / data.size) // Calculate totalPages from totalElements
+            totalElements: data.totalElements,
+            totalPages: Math.ceil(data.totalElements / data.size)
         };
     },
 
@@ -144,22 +143,70 @@ export const realApi: ApiService = {
         } as any;
     },
 
+    updateAuction: async (id, data, images) => {
+        const formData = new FormData();
+        const payload: any = {
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            startPrice: data.startPrice,
+            bidUnit: data.bidUnit,
+            buyNowPrice: data.buyNowPrice,
+        };
+
+        if (data.startAt) payload.auctionStartTime = `${data.startAt}:00`;
+        if (data.endAt) payload.auctionEndTime = `${data.endAt}:00`;
+
+        const requestBlob = new Blob([JSON.stringify(payload)], {
+            type: 'application/json'
+        });
+        formData.append('request', requestBlob, 'request.json');
+
+        if (images && images.length > 0) {
+            images.forEach((image) => {
+                formData.append('images', image);
+            });
+        }
+
+        const response = await client.put(`/api/v1/auctions/${id}`, formData);
+        const responseData = response.data;
+
+        return {
+            auctionItemId: responseData.id || responseData.auctionItemId,
+            title: responseData.title,
+            description: responseData.description,
+            category: responseData.category,
+            status: responseData.status,
+            startPrice: responseData.startPrice,
+            currentPrice: responseData.currentPrice,
+            startAt: responseData.auctionStartTime,
+            endAt: responseData.auctionEndTime,
+            imageUrls: responseData.imageUrls || [],
+            createdAt: responseData.createdAt,
+            updatedAt: responseData.updatedAt
+        } as any;
+    },
+
+    deleteAuction: async (id: number) => {
+        await client.delete(`/api/v1/auctions/${id}`);
+    },
+
     increaseViewCount: async (auctionId: number) => {
         // Backend uses PATCH /api/v1/auctions/{id}/view
         await client.patch(`/api/v1/auctions/${auctionId}/view`);
     },
 
-    toggleWishlist: async (auctionId: number) => {
+    toggleWatchlist: async (auctionId: number) => {
         const response = await client.post('/api/v1/watch-lists/toggle', { auctionItemId: auctionId });
         return response.data; // Returns message string
     },
 
-    getMyWishlist: async () => {
+    getMyWatchlist: async () => {
         const response = await client.get('/api/v1/watch-lists');
         // response.data is List<WatchListResponseDto>
         // assume WatchListResponseDto has auctionItemId or id
-        // Let's verify DTO. But usually it's list of objects.
-        // Assuming user wants IDs to check inclusion.
+        // let's verify DTO. but usually it's list of objects.
+        // assuming user wants IDs to check inclusion.
         return response.data.map((item: any) => item.auctionItemId);
     },
 
@@ -325,6 +372,20 @@ export const realApi: ApiService = {
         return response.data.data; // ApiResponse<BidHistoryResponse>
     },
 
+    getHighestBid: async (auctionId: number) => {
+        const response = await client.get(`/api/v1/bids/auction/${auctionId}/highest`);
+        return response.data.data; // ApiResponse<BidResponse>
+    },
+
+    getBidById: async (bidId: number) => {
+        const response = await client.get(`/api/v1/bids/${bidId}`);
+        return response.data.data; // ApiResponse<BidResponse>
+    },
+
+    cancelBid: async (bidId: number) => {
+        await client.delete(`/api/v1/bids/${bidId}`);
+    },
+
     buyNow: async (auctionId: number) => {
         const response = await client.post(`/api/v1/auctions/${auctionId}/buy-now`);
         return response.data; // orderId string
@@ -351,6 +412,10 @@ export const realApi: ApiService = {
             orderId,
             amount
         });
+    },
+
+    cancelOrder: async (orderId: string) => {
+        await client.post(`/api/v1/orders/${orderId}/cancel`);
     },
 
     getMyOrders: async () => {
@@ -504,7 +569,7 @@ const mapRecommendationItems = (items: any[]): AuctionItem[] => {
         sellerId: 0,
         viewCount: item.viewCount,
         bidCount: item.bidCount,
-        wishlistCount: item.watchlistCount,
+        watchlistCount: item.watchlistCount,
     }));
 };
 

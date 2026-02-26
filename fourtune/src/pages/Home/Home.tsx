@@ -35,7 +35,7 @@ const Home: React.FC = () => {
                         size: 8,
                         sort: 'POPULAR'
                     });
-                    setRecommendedItems(fallback.items);
+                    setRecommendedItems(fallback.content);
                 } catch (e) {
                     console.error('All recommendation options failed', e);
                 }

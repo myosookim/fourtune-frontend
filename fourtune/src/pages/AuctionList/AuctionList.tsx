@@ -65,7 +65,7 @@ const AuctionList: React.FC = () => {
                 status: status as AuctionStatus,
                 sort
             });
-            setItems(response.items);
+            setItems(response.content);
             setTotalPages(response.totalPages);
         } catch (error) {
             console.error(error);

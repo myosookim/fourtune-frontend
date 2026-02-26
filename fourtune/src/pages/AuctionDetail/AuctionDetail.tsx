@@ -13,7 +13,7 @@ const AuctionDetail: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState<string>('');
     const [error, setError] = useState('');
-    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [isWatchlisted, setIsWatchlisted] = useState(false);
     // Order status check for Buy Now
     const [myOrder, setMyOrder] = useState<OrderDetailResponse | null>(null);
     const [bidAmount, setBidAmount] = useState<number>(0);
@@ -38,18 +38,18 @@ const AuctionDetail: React.FC = () => {
                         setSelectedImage(data.imageUrls[0]);
                     }
 
-                    // 2. Wishlist Check - Check Server State
+                    // 2. Watchlist Check - Check Server State
                     if (api.isAuthenticated()) {
                         try {
-                            const myWishlist = await api.getMyWishlist();
-                            setIsWishlisted(myWishlist.includes(data.auctionItemId));
+                            const myWatchlist = await api.getMyWatchlist();
+                            setIsWatchlisted(myWatchlist.includes(data.auctionItemId));
                         } catch (e) {
-                            console.error('Failed to sync wishlist status', e);
-                            setIsWishlisted(false);
+                            console.error('Failed to sync watchlist status', e);
+                            setIsWatchlisted(false);
                         }
                     } else {
                         // Fallback for guest
-                        setIsWishlisted(false);
+                        setIsWatchlisted(false);
                     }
 
                     // 3. Order Status Check (if SOLD_BY_BUY_NOW)
@@ -163,28 +163,28 @@ const AuctionDetail: React.FC = () => {
         }
     };
 
-    const toggleWishlist = async () => {
+    const toggleWatchlist = async () => {
         if (!item) return;
         if (!checkAuth()) return;
 
         // Store previous state for revert
-        const prevIsWishlisted = isWishlisted;
-        const prevCount = item.wishlistCount || 0;
+        const prevIsWatchlisted = isWatchlisted;
+        const prevCount = item.watchlistCount || 0;
 
         try {
             // Optimistic Update
-            if (isWishlisted) {
-                // Currently wishlisted -> remove it
-                setIsWishlisted(false);
-                setItem(prev => prev ? { ...prev, wishlistCount: Math.max(0, (prev.wishlistCount || 0) - 1) } : null);
+            if (isWatchlisted) {
+                // Currently watchlisted -> remove it
+                setIsWatchlisted(false);
+                setItem(prev => prev ? { ...prev, watchlistCount: Math.max(0, (prev.watchlistCount || 0) - 1) } : null);
             } else {
-                // Not wishlisted -> add it
-                setIsWishlisted(true);
-                setItem(prev => prev ? { ...prev, wishlistCount: (prev.wishlistCount || 0) + 1 } : null);
+                // Not watchlisted -> add it
+                setIsWatchlisted(true);
+                setItem(prev => prev ? { ...prev, watchlistCount: (prev.watchlistCount || 0) + 1 } : null);
             }
 
             // Sync with Server
-            const responseMessage = await api.toggleWishlist(item.auctionItemId);
+            const responseMessage = await api.toggleWatchlist(item.auctionItemId);
 
             // Server Response validation
             // "관심상품에 등록되었습니다." means it is now ADDED.
@@ -193,32 +193,45 @@ const AuctionDetail: React.FC = () => {
 
             if (serverSaysAdded) {
                 // Force UI match if we were wrong
-                if (!prevIsWishlisted) {
+                if (!prevIsWatchlisted) {
                     // We optimistically added, and server added -> Good.
                 } else {
                     // We optimistically removed, but server added ?? 
                     // Means we were out of sync. Correct UI.
-                    setIsWishlisted(true);
+                    setIsWatchlisted(true);
                     // Count is trickier if we don't know the absolute truth, but trust optimistic if we match
                 }
             } else {
                 // Force UI match if we were wrong
-                if (prevIsWishlisted) {
+                if (prevIsWatchlisted) {
                     // We optimistically removed, server removed -> Good.
                 } else {
                     // We optimistically added, server removed ??
-                    setIsWishlisted(false);
+                    setIsWatchlisted(false);
                 }
             }
 
             alert(responseMessage);
 
         } catch (e) {
-            console.error('Failed to update wishlist', e);
+            console.error('Failed to update watchlist', e);
             // Revert on failure
-            setIsWishlisted(prevIsWishlisted);
-            setItem(prev => prev ? { ...prev, wishlistCount: prevCount } : null);
+            setIsWatchlisted(prevIsWatchlisted);
+            setItem(prev => prev ? { ...prev, watchlistCount: prevCount } : null);
             alert('관심상품 업데이트 중 오류가 발생했습니다.');
+        }
+    };
+
+    const handleDeleteAuction = async () => {
+        if (!item) return;
+        if (!confirm('경매를 삭제하시겠습니까?')) return;
+
+        try {
+            await api.deleteAuction(item.auctionItemId);
+            alert('경매가 삭제되었습니다.');
+            navigate('/auctions');
+        } catch (e: any) {
+            alert(e.response?.data?.message || '경매 삭제에 실패했습니다.');
         }
     };
 
@@ -283,7 +296,7 @@ const AuctionDetail: React.FC = () => {
                             <span className={classes.statIcon}>👁️</span> {item.viewCount ? item.viewCount.toLocaleString() : 0}
                         </div>
                         <div className={classes.statItem} title="관심 등록 수">
-                            <span className={classes.statIcon}>❤️</span> {item.wishlistCount ? item.wishlistCount.toLocaleString() : 0}
+                            <span className={classes.statIcon}>❤️</span> {item.watchlistCount ? item.watchlistCount.toLocaleString() : 0}
                         </div>
                         <div className={classes.statItem} title="입찰 수">
                             <span className={classes.statIcon}>🔨</span> {item.bidCount ? item.bidCount.toLocaleString() : 0}
@@ -438,16 +451,35 @@ const AuctionDetail: React.FC = () => {
                                     결제하기 (주문 대기중)
                                 </button>
                             )}
+                            {item.sellerId === api.getCurrentUser()?.id && (
+                                <div className={classes.sellerActions} style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                                    <button
+                                        onClick={() => navigate(`/auctions/edit/${item.auctionItemId}`)}
+                                        className={`btn btn-outline`}
+                                        style={{ flex: 1 }}
+                                    >
+                                        수정하기
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteAuction}
+                                        className={`btn btn-outline`}
+                                        style={{ flex: 1, color: '#fa5252', borderColor: '#fa5252' }}
+                                    >
+                                        삭제하기
+                                    </button>
+                                </div>
+                            )}
+
                             <button
-                                onClick={toggleWishlist}
-                                className={`btn ${isWishlisted ? 'btn-primary' : 'btn-outline'}`}
+                                onClick={toggleWatchlist}
+                                className={`btn ${isWatchlisted ? 'btn-primary' : 'btn-outline'}`}
                                 style={{ width: '100%' }}
                             >
                                 {/* Heart Icon SVG */}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={isWishlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '0.5rem' }}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill={isWatchlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '0.5rem' }}>
                                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                                 </svg>
-                                {isWishlisted ? '관심상품 해제' : '관심상품 추가'}
+                                {isWatchlisted ? '관심상품 해제' : '관심상품 추가'}
                             </button>
                         </div>
                     </div>

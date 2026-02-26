@@ -31,27 +31,25 @@ const saveMockCartItems = (items: MockCartItem[]) => {
 export const mockApi: ApiService = {
     searchAuctions: async (params) => {
         await delay(500);
-
         let filtered = [...MOCK_AUCTIONS];
 
         // Filter by Keyword
         if (params.keyword) {
             const lower = params.keyword.toLowerCase();
-            filtered = filtered.filter(item =>
-                item.title.toLowerCase().includes(lower) ||
-                item.description.toLowerCase().includes(lower)
+            filtered = filtered.filter(a =>
+                a.title.toLowerCase().includes(lower) ||
+                a.description.toLowerCase().includes(lower)
             );
         }
 
         // Filter by Category
-        if (params.category) {
-            filtered = filtered.filter(item => item.category === params.category);
-        }
+        if (params.category) filtered = filtered.filter(a => a.category === params.category);
 
         // Filter by Status
-        if (params.status) {
-            filtered = filtered.filter(item => item.status === params.status);
-        }
+        if (params.status) filtered = filtered.filter(a => a.status === params.status);
+
+        // Filter by Seller Name
+        if (params.sellerName) filtered = filtered.filter(a => a.sellerName === params.sellerName);
 
         // Sort
         if (params.sort === 'POPULAR') {
@@ -66,14 +64,16 @@ export const mockApi: ApiService = {
         const size = params.size || 10;
         const start = page * size;
         const end = start + size;
-        const items = filtered.slice(start, end);
+        const content = filtered.slice(start, end);
+        const totalElements = filtered.length;
         const totalPages = Math.ceil(filtered.length / size);
 
         return {
-            items,
-            page,
+            content,
+            totalElements,
+            totalPages,
             size,
-            totalPages
+            page
         };
     },
 
@@ -109,13 +109,30 @@ export const mockApi: ApiService = {
             sellerName: mockApi.getCurrentUser()?.name || 'Me',
             bidUnit: data.bidUnit || 1000,
             viewCount: 0,
-            wishlistCount: 0,
+            watchlistCount: 0,
             bidCount: 0,
         };
 
         // In a real scenario, this would be added to the backend
         // For mock, we'll just return it
         return newAuction;
+    },
+
+    updateAuction: async (id, data, images) => {
+        await delay(800);
+        const auction = MOCK_AUCTIONS.find(a => a.auctionItemId === id);
+        if (!auction) throw new Error('Auction not found');
+
+        if (data.title) auction.title = data.title;
+        if (data.description) auction.description = data.description;
+        if (images) auction.imageUrls = images.map((_, i) => `https://picsum.photos/800/600?random=${Date.now() + i}`);
+
+        return auction;
+    },
+
+    deleteAuction: async (id: number) => {
+        await delay(500);
+        console.log(`Mock: Auction ${id} deleted`);
     },
 
     increaseViewCount: async (auctionId: number) => {
@@ -126,38 +143,38 @@ export const mockApi: ApiService = {
         }
     },
 
-    toggleWishlist: async (auctionId: number) => {
+    toggleWatchlist: async (auctionId: number) => {
         await delay(300);
         const auction = MOCK_AUCTIONS.find(a => a.auctionItemId === auctionId);
         if (auction) {
-            const count = (auction.wishlistCount || 0);
+            const count = (auction.watchlistCount || 0);
 
             // Check localStorage for mock consistency
-            const saved = localStorage.getItem('wishlist');
-            let wishlist: number[] = saved ? JSON.parse(saved) : [];
+            const saved = localStorage.getItem('watchlist');
+            let watchlist: number[] = saved ? JSON.parse(saved) : [];
 
-            if (wishlist.includes(auctionId)) {
+            if (watchlist.includes(auctionId)) {
                 // It's liked, so unlike
-                auction.wishlistCount = Math.max(0, count - 1);
+                auction.watchlistCount = Math.max(0, count - 1);
                 // Sync LS
-                wishlist = wishlist.filter(id => id !== auctionId);
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
+                watchlist = watchlist.filter(id => id !== auctionId);
+                localStorage.setItem('watchlist', JSON.stringify(watchlist));
                 return "관심상품이 해제되었습니다.";
             } else {
                 // Like
-                auction.wishlistCount = count + 1;
+                auction.watchlistCount = count + 1;
                 // Sync LS
-                if (!wishlist.includes(auctionId)) wishlist.push(auctionId);
-                localStorage.setItem('wishlist', JSON.stringify(wishlist));
+                if (!watchlist.includes(auctionId)) watchlist.push(auctionId);
+                localStorage.setItem('watchlist', JSON.stringify(watchlist));
                 return "관심상품에 등록되었습니다.";
             }
         }
         return "";
     },
 
-    getMyWishlist: async () => {
+    getMyWatchlist: async () => {
         await delay(300);
-        const saved = localStorage.getItem('wishlist');
+        const saved = localStorage.getItem('watchlist');
         return saved ? JSON.parse(saved) : [];
     },
 
@@ -284,6 +301,41 @@ export const mockApi: ApiService = {
         };
     },
 
+    getHighestBid: async (auctionId: number) => {
+        await delay(500);
+        const auction = MOCK_AUCTIONS.find(a => a.auctionItemId === auctionId);
+        return {
+            id: 999,
+            auctionId,
+            auctionTitle: auction?.title || 'Unknown',
+            bidderId: 1,
+            bidderNickname: 'HighBidder',
+            bidAmount: (auction?.currentPrice || 0) + 1000,
+            status: 'ACTIVE',
+            isWinning: true,
+            createdAt: new Date().toISOString()
+        };
+    },
+
+    getBidById: async (bidId: number) => {
+        await delay(500);
+        return {
+            id: bidId,
+            auctionId: 1,
+            bidderId: 1,
+            bidderNickname: 'Bidder',
+            bidAmount: 10000,
+            status: 'ACTIVE',
+            isWinning: false,
+            createdAt: new Date().toISOString()
+        };
+    },
+
+    cancelBid: async (bidId: number) => {
+        await delay(500);
+        console.log(`Mock: Bid ${bidId} cancelled`);
+    },
+
     // Mock Payment & Order
     buyNow: async () => {
         await delay(500);
@@ -350,6 +402,11 @@ export const mockApi: ApiService = {
     confirmPayment: async (paymentKey: string, orderId: string, amount: number) => {
         await delay(1000);
         console.log(`[Mock] Payment Confirmed: ${paymentKey}, ${orderId}, ${amount}`);
+    },
+
+    cancelOrder: async (orderId: string) => {
+        await delay(500);
+        console.log(`Mock: Order ${orderId} cancelled`);
     },
 
     getMyOrders: async () => {
