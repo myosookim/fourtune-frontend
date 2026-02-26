@@ -9,6 +9,8 @@ const PaymentSuccess: React.FC = () => {
     const navigate = useNavigate();
     const [status, setStatus] = useState<'loading' | 'success' | 'fail'>('loading');
 
+    const isProcessing = React.useRef(false);
+
     useEffect(() => {
         const paymentKey = searchParams.get('paymentKey');
         const orderId = searchParams.get('orderId');
@@ -19,6 +21,9 @@ const PaymentSuccess: React.FC = () => {
             navigate('/');
             return;
         }
+
+        if (isProcessing.current) return;
+        isProcessing.current = true;
 
         api.confirmPayment(paymentKey, orderId, Number(amount))
             .then(() => {
