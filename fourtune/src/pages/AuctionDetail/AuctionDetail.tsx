@@ -7,9 +7,13 @@ import { AUCTION_STATUS_KO, AUCTION_CATEGORY_KO } from '../../constants/translat
 import { DEFAULT_AUCTION_IMAGE } from '../../constants/images';
 import classes from './AuctionDetail.module.css';
 import { AppIcon } from '../../components/common/Icon/AppIcon';
+import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AuctionDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const { showToast } = useToast();
+    const { isAuthenticated, user: currentUser } = useAuth();
     const navigate = useNavigate();
     const [item, setItem] = useState<AuctionItem | null>(null);
     const [loading, setLoading] = useState(true);
@@ -78,8 +82,8 @@ const AuctionDetail: React.FC = () => {
     }, [id]);
 
     const checkAuth = () => {
-        if (!api.isAuthenticated()) {
-            alert('로그인이 필요한 서비스입니다.');
+        if (!isAuthenticated) {
+            showToast('로그인이 필요한 서비스입니다.', 'error');
             return false;
         }
         return true;
@@ -94,7 +98,7 @@ const AuctionDetail: React.FC = () => {
 
         // 1. Validation: Verify minimum bid amount
         if (bidAmount < minBid) {
-            alert(`최소 입찰 금액은 ${minBid.toLocaleString()}원부터 가능합니다.`);
+            showToast(`최소 입찰 금액은 ${minBid.toLocaleString()}원부터 가능합니다.`, 'error');
             setBidAmount(minBid); // Auto-correct layout for convenience after alert
             return;
         }
@@ -108,7 +112,7 @@ const AuctionDetail: React.FC = () => {
 
         try {
             const response = await api.placeBid(item.auctionItemId, bidAmount);
-            alert(response.message || '입찰에 성공했습니다!');
+            showToast(response.message || '입찰에 성공했습니다!');
             // Refresh item data
             const updatedItem = await api.getAuctionById(item.auctionItemId);
             setItem(updatedItem);
@@ -116,7 +120,7 @@ const AuctionDetail: React.FC = () => {
         } catch (error: any) {
             console.error('Bidding failed', error);
             const errorMessage = error.response?.data?.message || '입찰에 실패했습니다.';
-            alert(errorMessage);
+            showToast(errorMessage, 'error');
         }
     };
 
@@ -137,16 +141,16 @@ const AuctionDetail: React.FC = () => {
             const errorMessage = error.response?.data?.message;
 
             if (errorCode === 'BN001') { // BUY_NOW_NOT_ENABLED
-                alert('즉시 구매가 불가능한 경매입니다.');
+                showToast('즉시 구매가 불가능한 경매입니다.', 'error');
             } else if (errorCode === 'BN002') { // BUY_NOW_PRICE_NOT_SET
-                alert('즉시 구매 가격이 설정되지 않았습니다.');
+                showToast('즉시 구매 가격이 설정되지 않았습니다.', 'error');
             } else if (errorCode === 'BN003') { // AUCTION_NOT_ACTIVE
-                alert('진행 중인 경매가 아닙니다.');
+                showToast('진행 중인 경매가 아닙니다.', 'error');
             } else if (errorCode === 'BN005') { // CANNOT_BUY_OWN_ITEM
-                alert('본인의 상품은 구매할 수 없습니다.');
+                showToast('본인의 상품은 구매할 수 없습니다.', 'error');
             } else {
                 // Should show backend message if available, or default
-                alert(errorMessage || '즉시 구매 요청에 실패했습니다. (알 수 없는 오류)');
+                showToast(errorMessage || '즉시 구매 요청에 실패했습니다.', 'error');
             }
         }
     };
@@ -157,13 +161,12 @@ const AuctionDetail: React.FC = () => {
 
         try {
             await api.addItemToCart(item.auctionItemId);
-            if (confirm('장바구니에 담겼습니다. 장바구니로 이동하시겠습니까?')) {
-                navigate('/cart');
-            }
+            showToast('장바구니에 담겼습니다.');
+            // (Optional: confirmation logic could be replaced by Toast action, but simple toast is better for micro-interaction)
         } catch (error: any) {
             console.error('Failed to add to cart', error);
             const errorMessage = error.response?.data?.message || '장바구니 담기에 실패했습니다.';
-            alert(errorMessage);
+            showToast(errorMessage, 'error');
         }
     };
 
@@ -171,54 +174,30 @@ const AuctionDetail: React.FC = () => {
         if (!item) return;
         if (!checkAuth()) return;
 
-        // Store previous state for revert
         const prevIsWatchlisted = isWatchlisted;
         const prevCount = item.watchlistCount || 0;
 
         try {
-            // Optimistic Update
             if (isWatchlisted) {
-                // Currently watchlisted -> remove it
                 setIsWatchlisted(false);
                 setItem(prev => prev ? { ...prev, watchlistCount: Math.max(0, (prev.watchlistCount || 0) - 1) } : null);
             } else {
-                // Not watchlisted -> add it
                 setIsWatchlisted(true);
                 setItem(prev => prev ? { ...prev, watchlistCount: (prev.watchlistCount || 0) + 1 } : null);
             }
 
-            // Sync with Server
             const isAdded = await api.toggleWatchlist(item.auctionItemId);
 
-            // Server Response validation
             if (isAdded) {
-                // Force UI match if we were wrong
-                if (!prevIsWatchlisted) {
-                    // We optimistically added, and server added -> Good.
-                } else {
-                    // We optimistically removed, but server added ?? 
-                    // Means we were out of sync. Correct UI.
-                    setIsWatchlisted(true);
-                    // Count is trickier if we don't know the absolute truth, but trust optimistic if we match
-                }
-                alert('관심상품에 등록되었습니다.');
+                showToast('관심상품에 등록되었습니다.');
             } else {
-                // Force UI match if we were wrong
-                if (prevIsWatchlisted) {
-                    // We optimistically removed, server removed -> Good.
-                } else {
-                    // We optimistically added, server removed ??
-                    setIsWatchlisted(false);
-                }
-                alert('관심상품이 해제되었습니다.');
+                showToast('관심상품이 해제되었습니다.', 'info');
             }
-
         } catch (e) {
             console.error('Failed to update watchlist', e);
-            // Revert on failure
             setIsWatchlisted(prevIsWatchlisted);
             setItem(prev => prev ? { ...prev, watchlistCount: prevCount } : null);
-            alert('관심상품 업데이트 중 오류가 발생했습니다.');
+            showToast('관심상품 업데이트 중 오류가 발생했습니다.', 'error');
         }
     };
 
@@ -228,16 +207,16 @@ const AuctionDetail: React.FC = () => {
 
         try {
             await api.deleteAuction(item.auctionItemId);
-            alert('경매가 삭제되었습니다.');
+            showToast('경매가 삭제되었습니다.');
             navigate('/auctions');
         } catch (e: any) {
-            alert(e.response?.data?.message || '경매 삭제에 실패했습니다.');
+            showToast(e.response?.data?.message || '경매 삭제에 실패했습니다.', 'error');
         }
     };
 
     const getStatusBadge = (status: AuctionStatus) => {
         if (status === AuctionStatus.SOLD_BY_BUY_NOW && myOrder && myOrder.status === 'PENDING') {
-            return classes.badgeRunning; // Use green/active color for pending payment
+            return classes.badgeRunning;
         }
 
         switch (status) {
@@ -453,7 +432,7 @@ const AuctionDetail: React.FC = () => {
                                     결제하기 (주문 대기중)
                                 </button>
                             )}
-                            {item.sellerId === api.getCurrentUser()?.id && (
+                            {item.sellerId === currentUser?.id && (
                                 <div className={classes.sellerActions} style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                                     {![AuctionStatus.ENDED, AuctionStatus.SOLD, AuctionStatus.SOLD_BY_BUY_NOW, AuctionStatus.CANCELLED].includes(item.status as any) && (
                                         <button

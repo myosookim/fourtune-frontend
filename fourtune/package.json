@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.21",
     "@tosspayments/payment-sdk": "^1.9.2",
     "@tosspayments/tosspayments-sdk": "^2.5.0",
     "axios": "^1.13.2",
