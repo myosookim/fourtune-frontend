@@ -5,6 +5,8 @@ import { LoginRequired } from '../../components/common/LoginRequired';
 import { api } from '../../services/api';
 import { type CartResponse, type CartItemResponse, CartItemStatus } from '../../types';
 import { useToast } from '../../contexts/ToastContext';
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 import classes from './Cart.module.css';
 
 const Cart: React.FC = () => {
@@ -12,6 +14,9 @@ const Cart: React.FC = () => {
     const [cart, setCart] = useState<CartResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
+
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [processing, setProcessing] = useState(false);
 
@@ -137,8 +142,8 @@ const Cart: React.FC = () => {
         }
     };
 
-    if (loading) return <div className={classes.container}>Loading...</div>;
-    if (!cart) return <div className={classes.container}>Error loading cart</div>;
+    if (shouldShowLoading) return <LoadingIndicator message="장바구니를 불러오는 중..." fullPage />;
+    if (loading || !cart) return null;
 
     const activeItems = cart.items.filter((item: CartItemResponse) => item.status === CartItemStatus.ACTIVE);
     const selectedItems = activeItems.filter((item: CartItemResponse) => selectedIds.has(item.id));

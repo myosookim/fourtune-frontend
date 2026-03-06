@@ -9,6 +9,9 @@ import { LoginRequired } from '../../components/common/LoginRequired';
 import ProfileSettings from './ProfileSettings';
 import WalletHistory from './WalletHistory';
 import NotificationSettings from './NotificationSettings';
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { useToast } from '../../contexts/ToastContext';
 
 type Tab = 'watchlist' | 'orders' | 'bids' | 'auctions' | 'history' | 'profile' | 'wallet' | 'notifications';
 
@@ -42,6 +45,10 @@ const MyPage: React.FC = () => {
     const [bids, setBids] = useState<any[]>([]);
     const [myAuctions, setMyAuctions] = useState<AuctionItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const { showToast } = useToast();
+
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
 
     const user = api.getCurrentUser() || { name: '비회원', email: '' };
     const isAuthenticated = api.isAuthenticated();
@@ -130,10 +137,10 @@ const MyPage: React.FC = () => {
         if (!confirm('입찰을 취소하시겠습니까?')) return;
         try {
             await api.cancelBid(bidId);
-            alert('입찰이 취소되었습니다.');
+            showToast('입찰이 취소되었습니다.');
             fetchBids();
         } catch (e: any) {
-            alert(e.response?.data?.message || '입찰 취소에 실패했습니다.');
+            showToast(e.response?.data?.message || '입찰 취소에 실패했습니다.', 'error');
         }
     };
 
@@ -141,10 +148,10 @@ const MyPage: React.FC = () => {
         if (!confirm('주문을 취소하시겠습니까?')) return;
         try {
             await api.cancelOrder(orderId);
-            alert('주문이 취소되었습니다.');
+            showToast('주문이 취소되었습니다.');
             fetchOrders();
         } catch (e: any) {
-            alert(e.response?.data?.message || '주문 취소에 실패했습니다.');
+            showToast(e.response?.data?.message || '주문 취소에 실패했습니다.', 'error');
         }
     };
 
@@ -152,15 +159,16 @@ const MyPage: React.FC = () => {
         if (!confirm('경매를 삭제하시겠습니까?')) return;
         try {
             await api.deleteAuction(id);
-            alert('경매가 삭제되었습니다.');
+            showToast('경매가 삭제되었습니다.');
             fetchMyAuctions();
         } catch (e: any) {
-            alert(e.response?.data?.message || '경매 삭제에 실패했습니다.');
+            showToast(e.response?.data?.message || '경매 삭제에 실패했습니다.', 'error');
         }
     };
 
     const renderContent = () => {
-        if (loading && activeTab !== 'profile' && activeTab !== 'wallet') return <div className={classes.emptyState}>로딩 중...</div>;
+        if (shouldShowLoading && activeTab !== 'profile' && activeTab !== 'wallet' && activeTab !== 'notifications') return <LoadingIndicator message="활동 정보를 불러오는 중..." />;
+        if (loading && activeTab !== 'profile' && activeTab !== 'wallet' && activeTab !== 'notifications') return null;
 
         if (activeTab === 'profile') {
             return <ProfileSettings userInfo={userInfo} onUpdate={fetchUserInfo} />;

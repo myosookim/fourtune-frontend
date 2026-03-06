@@ -2,10 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 import { type WalletResponse } from '../../services/api.interface';
 import classes from './WalletHistory.module.css';
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 
 const WalletHistory: React.FC = () => {
     const [walletData, setWalletData] = useState<WalletResponse | null>(null);
     const [loading, setLoading] = useState(true);
+
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
 
     useEffect(() => {
         const fetchWallet = async () => {
@@ -21,9 +26,8 @@ const WalletHistory: React.FC = () => {
         fetchWallet();
     }, []);
 
-    if (loading) {
-        return <div className={classes.loadingState}>지갑 정보를 불러오는 중...</div>;
-    }
+    if (shouldShowLoading) return <LoadingIndicator message="지갑 정보를 불러오는 중..." />;
+    if (loading) return null;
 
     if (!walletData) {
         return <div className={classes.errorState}>지갑 정보를 불러올 수 없습니다.</div>;

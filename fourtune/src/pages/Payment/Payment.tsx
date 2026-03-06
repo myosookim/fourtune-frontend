@@ -4,6 +4,8 @@ import { api } from '../../services/api';
 import type { OrderDetailResponse } from '../../services/api.interface';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
 import styles from '../Order/OrderSheet.module.css'; // Reuse OrderSheet styles
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 
 const Payment: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -12,6 +14,9 @@ const Payment: React.FC = () => {
 
     const [order, setOrder] = useState<OrderDetailResponse | null>(null);
     const [loading, setLoading] = useState(true);
+
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
     const [error, setError] = useState<string | null>(null);
 
     const clientKey = import.meta.env.VITE_TOSS_CLIENT_KEY || 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
@@ -70,12 +75,8 @@ const Payment: React.FC = () => {
         }
     };
 
-    if (loading) return (
-        <div className={styles.loadingContainer}>
-            <div className={styles.spinner}></div>
-            <p>주문 정보를 불러오는 중입니다...</p>
-        </div>
-    );
+    if (shouldShowLoading) return <LoadingIndicator message="주문 정보를 불러오는 중..." fullPage />;
+    if (loading) return null;
 
     if (error) return (
         <div className={styles.errorContainer}>

@@ -3,11 +3,16 @@ import { api } from '../../services/api';
 import { type SettlementResponse, type SettlementCandidatedItemDto } from '../../types';
 import classes from './Settlement.module.css';
 import { LoginRequired } from '../../components/common/LoginRequired';
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 
 const SettlementPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [history, setHistory] = useState<SettlementResponse[]>([]);
     const [pendings, setPendings] = useState<SettlementCandidatedItemDto[]>([]);
+
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
 
     const isAuthenticated = api.isAuthenticated();
 
@@ -43,9 +48,8 @@ const SettlementPage: React.FC = () => {
         }
     };
 
-    if (loading) {
-        return <div className={classes.container} style={{ textAlign: 'center', marginTop: '4rem' }}>Loading settlement data...</div>;
-    }
+    if (shouldShowLoading) return <LoadingIndicator message="정산 데이터를 불러오는 중..." fullPage />;
+    if (loading) return null;
 
     const totalSettledAmount = history.reduce((sum, item) => sum + item.totalAmount, 0);
 

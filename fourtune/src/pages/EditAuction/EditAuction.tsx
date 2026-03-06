@@ -6,6 +6,9 @@ import { api } from '../../services/api';
 import { AuctionCategory } from '../../types';
 import type { CreateAuctionRequest } from '../../services/api.interface';
 import { AUCTION_CATEGORY_KO } from '../../constants/translations';
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { useToast } from '../../contexts/ToastContext';
 
 const EditAuction: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -14,6 +17,8 @@ const EditAuction: React.FC = () => {
     const [images, setImages] = useState<File[]>([]);
     const [isBuyNowEnabled, setIsBuyNowEnabled] = useState(false);
     const [auctionStatus, setAuctionStatus] = useState<string>('');
+    const { showToast } = useToast();
+
     const [formData, setFormData] = useState<CreateAuctionRequest>({
         title: '',
         description: '',
@@ -25,9 +30,12 @@ const EditAuction: React.FC = () => {
         endAt: '',
     });
 
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(isLoading && !formData.title, 300);
+
     useEffect(() => {
         if (!api.isAuthenticated()) {
-            alert('로그인이 필요합니다.');
+            showToast('로그인이 필요합니다.', 'info');
             navigate('/login');
             return;
         }
@@ -38,7 +46,7 @@ const EditAuction: React.FC = () => {
                 .then(data => {
                     // Check if current user is seller
                     if (data.sellerId !== api.getCurrentUser()?.id) {
-                        alert('본인의 경매만 수정할 수 있습니다.');
+                        showToast('본인의 경매만 수정할 수 있습니다.', 'error');
                         navigate(`/auctions/${id}`);
                         return;
                     }
@@ -46,7 +54,7 @@ const EditAuction: React.FC = () => {
                     // Check if auction is finished
                     const finishedStatuses = ['ENDED', 'SOLD', 'SOLD_BY_BUY_NOW', 'CANCELLED'];
                     if (finishedStatuses.includes(data.status)) {
-                        alert('종료된 경매는 수정할 수 없습니다.');
+                        showToast('종료된 경매는 수정할 수 없습니다.', 'info');
                         navigate(-1);
                         return;
                     }
@@ -66,7 +74,7 @@ const EditAuction: React.FC = () => {
                 })
                 .catch(err => {
                     console.error('Failed to load auction for editing', err);
-                    alert('경매 정보를 불러오는 데 실패했습니다.');
+                    showToast('경매 정보를 불러오는 데 실패했습니다.', 'error');
                     navigate(-1);
                 })
                 .finally(() => setIsLoading(false));
@@ -100,18 +108,19 @@ const EditAuction: React.FC = () => {
             };
 
             await api.updateAuction(Number(id), payload, images.length > 0 ? images : undefined);
-            alert('경매 상품이 수정되었습니다!');
+            showToast('경매 상품이 수정되었습니다!');
             navigate(`/auctions/${id}`);
         } catch (e) {
             const error = e as AxiosError<any>;
             console.error('Auction update error:', error);
-            alert(error.response?.data?.message || '경매 상품 수정에 실패했습니다.');
+            showToast(error.response?.data?.message || '경매 상품 수정에 실패했습니다.', 'error');
         } finally {
             setIsLoading(false);
         }
     };
 
-    if (isLoading && !formData.title) return <div className={classes.container}>Loading...</div>;
+    if (shouldShowLoading) return <LoadingIndicator message="상품 정보를 불러오는 중..." fullPage />;
+    if (isLoading && !formData.title) return null;
 
     return (
         <div className={classes.container}>

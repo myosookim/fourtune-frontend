@@ -9,6 +9,8 @@ import classes from './AuctionDetail.module.css';
 import { AppIcon } from '../../components/common/Icon/AppIcon';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 
 const AuctionDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -17,6 +19,10 @@ const AuctionDetail: React.FC = () => {
     const navigate = useNavigate();
     const [item, setItem] = useState<AuctionItem | null>(null);
     const [loading, setLoading] = useState(true);
+
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
+
     const [selectedImage, setSelectedImage] = useState<string>(DEFAULT_AUCTION_IMAGE);
     const [error, setError] = useState('');
     const [isWatchlisted, setIsWatchlisted] = useState(false);
@@ -238,8 +244,9 @@ const AuctionDetail: React.FC = () => {
         return AUCTION_STATUS_KO[status];
     };
 
-    if (loading) return <div className={classes.container} style={{ padding: '4rem 0', textAlign: 'center' }}>Loading...</div>;
-    if (error || !item) return <div className={classes.container} style={{ padding: '4rem 0', textAlign: 'center' }}>{error || 'Item not found'}</div>;
+    if (shouldShowLoading) return <LoadingIndicator message="상품 정보를 불러오는 중..." fullPage />;
+    if (!loading && (error || !item)) return <div className={classes.container} style={{ padding: '4rem 0', textAlign: 'center' }}>{error || 'Item not found'}</div>;
+    if (loading || !item) return null;
 
     return (
         <div className={classes.container}>

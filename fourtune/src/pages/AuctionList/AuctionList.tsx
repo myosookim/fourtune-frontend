@@ -6,12 +6,17 @@ import { AuctionCard } from '../../components/features/AuctionCard';
 import { SearchBar } from '../../components/features/SearchBar/SearchBar';
 import { AUCTION_STATUS_KO, AUCTION_CATEGORY_KO } from '../../constants/translations';
 import classes from './AuctionList.module.css';
+import { AuctionCardSkeleton } from '../../components/features/AuctionCardSkeleton';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 
 const AuctionList: React.FC = () => {
     const [items, setItems] = useState<AuctionItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+
+    // Flicker prevention
+    const shouldShowSkeleton = useLoadingDelay(loading, 300);
 
     const [searchParams] = useSearchParams();
 
@@ -126,8 +131,12 @@ const AuctionList: React.FC = () => {
                 </div>
             </div>
 
-            {loading ? (
-                <div className={classes.loader}>상품을 불러오는 중...</div>
+            {shouldShowSkeleton ? (
+                <div className={classes.grid}>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <AuctionCardSkeleton key={i} />
+                    ))}
+                </div>
             ) : (
                 <>
                     {items.length === 0 ? (

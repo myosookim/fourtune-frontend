@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { api } from '../../services/api';
 import { type NotificationResponseDto } from '../../services/api.interface';
 import classes from './NotificationDropdown.module.css';
+import { LoadingIndicator } from './LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 
 interface Props {
     onClose: () => void;
@@ -12,6 +14,9 @@ const NotificationDropdown: React.FC<Props> = ({ onClose }) => {
     const [notifications, setNotifications] = useState<NotificationResponseDto[]>([]);
     const [loading, setLoading] = useState(true);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
 
     useEffect(() => {
         const fetchNotifications = async () => {
@@ -66,9 +71,9 @@ const NotificationDropdown: React.FC<Props> = ({ onClose }) => {
             </div>
 
             <div className={classes.list}>
-                {loading ? (
-                    <div className={classes.status}>로딩 중...</div>
-                ) : notifications.length === 0 ? (
+                {shouldShowLoading ? (
+                    <div className={classes.status}><LoadingIndicator message="알림을 불러오는 중..." inline /></div>
+                ) : loading ? null : notifications.length === 0 ? (
                     <div className={classes.status}>알림이 없습니다.</div>
                 ) : (
                     notifications.map(n => (

@@ -3,12 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import type { OrderResponse } from '../../services/api.interface';
 import styles from './MyOrders.module.css';
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { useToast } from '../../contexts/ToastContext';
 
 const MyOrders: React.FC = () => {
     const navigate = useNavigate();
     const [orders, setOrders] = useState<OrderResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { showToast } = useToast();
+
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -33,11 +40,12 @@ const MyOrders: React.FC = () => {
         } else {
             // For completed orders, we could show a detail modal or just stay here for now
             // Future: navigate(`/my/orders/${orderId}`)
-            alert(`주문 상세 로직 (추후 구현): ${orderId}`);
+            showToast(`상세 보기 기능은 준비 중입니다. (${orderId})`, 'info');
         }
     };
 
-    if (loading) return <div className={styles.container}>로딩 중...</div>;
+    if (shouldShowLoading) return <LoadingIndicator message="주문 내역을 불러오는 중..." fullPage />;
+    if (loading) return null;
     if (error) return <div className={styles.container}>{error}</div>;
 
     return (

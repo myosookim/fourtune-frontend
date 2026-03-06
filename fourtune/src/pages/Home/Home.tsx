@@ -1,6 +1,7 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 import { auctionService } from '../../services/auction.service';
 import { type AuctionItem } from '../../types';
 import { AuctionCard } from '../../components/features/AuctionCard';
@@ -39,6 +40,8 @@ const Home: React.FC = () => {
         staleTime: 1000 * 60 * 5, // 5 minutes
     });
 
+    const shouldShowSkeleton = useLoadingDelay(isLoading, 300);
+
     return (
         <div>
             {/* Hero Section */}
@@ -68,15 +71,15 @@ const Home: React.FC = () => {
                 </div>
 
                 <div className={classes.grid}>
-                    {isLoading ? (
+                    {shouldShowSkeleton ? (
                         Array.from({ length: 8 }).map((_, idx) => (
                             <AuctionCardSkeleton key={idx} />
                         ))
-                    ) : (
+                    ) : !isLoading ? (
                         recommendedItems.map((item: AuctionItem) => (
                             <AuctionCard key={item.auctionItemId} item={item} />
                         ))
-                    )}
+                    ) : null}
                 </div>
             </section>
         </div>
