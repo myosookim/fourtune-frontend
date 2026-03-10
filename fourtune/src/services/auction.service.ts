@@ -151,7 +151,29 @@ export const auctionService = {
         }
 
         const response = await axiosClient.post('/api/v1/auctions', formData);
-        return response.data; // Simplified for brevity in refactor
+        const resData = response.data;
+
+        return {
+            auctionItemId: resData.id,
+            title: resData.title,
+            description: resData.description,
+            category: resData.category,
+            status: resData.status,
+            startPrice: resData.startPrice,
+            currentPrice: resData.currentPrice,
+            startAt: resData.auctionStartTime,
+            endAt: resData.auctionEndTime,
+            imageUrls: resData.imageUrls || [],
+            createdAt: '',
+            updatedAt: '',
+            buyNowPrice: resData.buyNowPrice,
+            sellerName: resData.sellerNickname,
+            sellerId: resData.sellerId,
+            bidUnit: resData.bidUnit,
+            viewCount: resData.viewCount,
+            bidCount: resData.bidCount,
+            watchlistCount: resData.watchlistCount,
+        };
     },
 
     updateAuction: async (id: number, data: any, images?: File[]): Promise<AuctionItem> => {
@@ -168,7 +190,29 @@ export const auctionService = {
         }
 
         const response = await axiosClient.put(`/api/v1/auctions/${id}`, formData);
-        return response.data;
+        const resData = response.data;
+
+        return {
+            auctionItemId: resData.id,
+            title: resData.title,
+            description: resData.description,
+            category: resData.category,
+            status: resData.status,
+            startPrice: resData.startPrice,
+            currentPrice: resData.currentPrice,
+            startAt: resData.auctionStartTime,
+            endAt: resData.auctionEndTime,
+            imageUrls: resData.imageUrls || [],
+            createdAt: '',
+            updatedAt: '',
+            buyNowPrice: resData.buyNowPrice,
+            sellerName: resData.sellerNickname,
+            sellerId: resData.sellerId,
+            bidUnit: resData.bidUnit,
+            viewCount: resData.viewCount,
+            bidCount: resData.bidCount,
+            watchlistCount: resData.watchlistCount,
+        };
     },
 
     deleteAuction: async (id: number): Promise<void> => {

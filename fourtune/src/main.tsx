@@ -11,10 +11,8 @@ import './index.css';
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            // Serve cached data for 60s before marking stale
-            staleTime: 60 * 1000,
-            // Keep unused cache for 5 minutes
-            gcTime: 5 * 60 * 1000,
+            // TODO: 트래픽/상품 수가 증가하면 staleTime 도입 검토 (예: staleTime: 60 * 1000)
+            // 현재는 항상 최신 데이터를 보장하기 위해 기본값(0) 사용
             retry: 2,
             refetchOnWindowFocus: false,
         },
