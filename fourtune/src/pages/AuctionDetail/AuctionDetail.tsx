@@ -197,6 +197,12 @@ const AuctionDetail: React.FC = () => {
         if (!item) return;
         if (!checkAuth()) return;
 
+        // 본인 상품인지 확인
+        if (currentUser && item.sellerId === currentUser.id) {
+            showToast('본인 상품은 관심상품으로 등록할 수 없습니다.', 'error');
+            return;
+        }
+
         const prevIsWatchlisted = isWatchlisted;
         const prevCount = item.watchlistCount || 0;
 
