@@ -11,6 +11,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
 import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { useSmartPolling } from '../../hooks/useSmartPolling';
 
 const AuctionDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -86,6 +87,22 @@ const AuctionDetail: React.FC = () => {
                 .finally(() => setLoading(false));
         }
     }, [id]);
+
+    // Smart Polling: ACTIVE 경매에서 15초마다 입찰가 및 상태 자동 갱신
+    useSmartPolling(() => {
+        if (!id || !item) return;
+        api.getAuctionById(Number(id))
+            .then(updated => {
+                setItem(prev => prev ? {
+                    ...prev,
+                    currentPrice: updated.currentPrice,
+                    bidCount: updated.bidCount,
+                    watchlistCount: updated.watchlistCount,
+                    status: updated.status,
+                } : null);
+            })
+            .catch(() => { /* silent — don't interrupt the user */ });
+    }, item?.status === AuctionStatus.ACTIVE ? 15000 : null);
 
     const checkAuth = () => {
         if (!isAuthenticated) {
