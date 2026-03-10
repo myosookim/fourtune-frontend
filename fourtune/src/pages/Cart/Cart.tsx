@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// Force TS Recheck
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginRequired } from '../../components/common/LoginRequired';
 import { api } from '../../services/api';
@@ -7,10 +6,12 @@ import { type CartResponse, type CartItemResponse, CartItemStatus } from '../../
 import { useToast } from '../../contexts/ToastContext';
 import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
 import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { useAuth } from '../../contexts/AuthContext';
 import classes from './Cart.module.css';
 
 const Cart: React.FC = () => {
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
     const [cart, setCart] = useState<CartResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
@@ -19,8 +20,6 @@ const Cart: React.FC = () => {
     const shouldShowLoading = useLoadingDelay(loading, 300);
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [processing, setProcessing] = useState(false);
-
-    const isAuthenticated = api.isAuthenticated();
 
     if (!isAuthenticated) {
         return (

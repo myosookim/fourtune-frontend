@@ -6,9 +6,13 @@ import { api } from '../../services/api';
 import { AuctionCategory } from '../../types';
 import type { CreateAuctionRequest } from '../../services/api.interface';
 import { AUCTION_CATEGORY_KO } from '../../constants/translations';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 
 const CreateAuction: React.FC = () => {
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
+    const { showToast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
     const [images, setImages] = useState<File[]>([]);
     const [isBuyNowEnabled, setIsBuyNowEnabled] = useState(false); // Toggle state
@@ -34,11 +38,11 @@ const CreateAuction: React.FC = () => {
 
     // Check authentication on mount
     useEffect(() => {
-        if (!api.isAuthenticated()) {
-            alert('로그인이 필요합니다.');
+        if (!isAuthenticated) {
+            showToast('로그인이 필요합니다.', 'info');
             navigate('/login');
         }
-    }, [navigate]);
+    }, [isAuthenticated, navigate]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;

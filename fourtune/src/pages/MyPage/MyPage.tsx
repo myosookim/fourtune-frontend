@@ -12,6 +12,7 @@ import NotificationSettings from './NotificationSettings';
 import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
 import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 type Tab = 'watchlist' | 'orders' | 'bids' | 'auctions' | 'history' | 'profile' | 'wallet' | 'notifications';
 
@@ -50,8 +51,8 @@ const MyPage: React.FC = () => {
     // Flicker prevention
     const shouldShowLoading = useLoadingDelay(loading, 300);
 
-    const user = api.getCurrentUser() || { name: '비회원', email: '' };
-    const isAuthenticated = api.isAuthenticated();
+    const { isAuthenticated, user: authUser } = useAuth();
+    const user = authUser || { name: '비회원', email: '' };
 
     if (!isAuthenticated) {
         return <LoginRequired message="로그인이 필요한 서비스입니다." />;

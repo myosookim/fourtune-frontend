@@ -54,7 +54,7 @@ const AuctionDetail: React.FC = () => {
                     }
 
                     // 2. Watchlist Check - Check Server State
-                    if (api.isAuthenticated()) {
+                    if (isAuthenticated) {
                         try {
                             const myWatchlist = await api.getMyWatchlist();
                             setIsWatchlisted(myWatchlist.includes(data.auctionItemId));
@@ -68,7 +68,7 @@ const AuctionDetail: React.FC = () => {
                     }
 
                     // 3. Order Status Check (if SOLD_BY_BUY_NOW)
-                    if (data.status === AuctionStatus.SOLD_BY_BUY_NOW && api.isAuthenticated()) {
+                    if (data.status === AuctionStatus.SOLD_BY_BUY_NOW && isAuthenticated) {
                         api.getOrderByAuctionId(data.auctionItemId)
                             .then((order: OrderDetailResponse) => {
                                 if (order && order.status === 'PENDING') {

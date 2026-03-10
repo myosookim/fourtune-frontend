@@ -5,6 +5,7 @@ import classes from './Settlement.module.css';
 import { LoginRequired } from '../../components/common/LoginRequired';
 import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
 import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { useAuth } from '../../contexts/AuthContext';
 
 const SettlementPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
@@ -13,8 +14,7 @@ const SettlementPage: React.FC = () => {
 
     // Flicker prevention
     const shouldShowLoading = useLoadingDelay(loading, 300);
-
-    const isAuthenticated = api.isAuthenticated();
+    const { isAuthenticated } = useAuth();
 
     useEffect(() => {
         if (isAuthenticated) {

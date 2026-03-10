@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import classes from './EditAuction.module.css'; // Reusing CreateAuction styles if possible, or create new
+import classes from './EditAuction.module.css';
 import { api } from '../../services/api';
 import { AuctionCategory } from '../../types';
 import type { CreateAuctionRequest } from '../../services/api.interface';
@@ -9,10 +9,12 @@ import { AUCTION_CATEGORY_KO } from '../../constants/translations';
 import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
 import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const EditAuction: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [images, setImages] = useState<File[]>([]);
     const [isBuyNowEnabled, setIsBuyNowEnabled] = useState(false);
@@ -34,7 +36,7 @@ const EditAuction: React.FC = () => {
     const shouldShowLoading = useLoadingDelay(isLoading && !formData.title, 300);
 
     useEffect(() => {
-        if (!api.isAuthenticated()) {
+        if (!isAuthenticated) {
             showToast('로그인이 필요합니다.', 'info');
             navigate('/login');
             return;
