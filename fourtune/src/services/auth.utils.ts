@@ -7,3 +7,13 @@ export function parseJwt(token: string) {
 
     return JSON.parse(jsonPayload);
 }
+
+export function getStoredToken(): string | null {
+    const token = localStorage.getItem('token');
+    if (!token || token === 'undefined' || token === 'null') return null;
+    return token;
+}
+
+export function isUserAuthenticated(): boolean {
+    return !!getStoredToken();
+}

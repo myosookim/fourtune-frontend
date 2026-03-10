@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { userService } from '../services/user.service';
+import { getStoredToken, parseJwt } from '../services/auth.utils';
 
 interface User {
     id?: number;
@@ -23,21 +24,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isLoading, setIsLoading] = useState(true);
 
     const checkAuth = useCallback(() => {
-        const token = localStorage.getItem('token');
+        const token = getStoredToken();
         const userStr = localStorage.getItem('user');
 
-        if (token && userStr) {
-            try {
-                setUser(JSON.parse(userStr));
-            } catch (e) {
-                console.error('Failed to parse user from localStorage');
-                setUser(null);
+        if (token) {
+            if (userStr) {
+                try {
+                    setUser(JSON.parse(userStr));
+                } catch (e) {
+                    console.error('Failed to parse user from localStorage');
+                    recoverUserFromToken(token);
+                }
+            } else {
+                // 토큰은 있는데 유저 정보가 없는 경우 (예: 새로고침 또는 타임아웃)
+                recoverUserFromToken(token);
             }
         } else {
             setUser(null);
+            localStorage.removeItem('user'); // 토큰 없으면 유저 정보도 삭제
         }
         setIsLoading(false);
     }, []);
+
+    const recoverUserFromToken = (token: string) => {
+        try {
+            const payload = parseJwt(token);
+            const recoveredUser = {
+                id: payload.sub ? Number(payload.sub) : 0,
+                email: payload.email || '',
+                name: payload.nickname || payload.name || 'User'
+            };
+            setUser(recoveredUser);
+            localStorage.setItem('user', JSON.stringify(recoveredUser));
+        } catch (e) {
+            console.error('Failed to recover user from token', e);
+            setUser(null);
+        }
+    };
 
     useEffect(() => {
         checkAuth();

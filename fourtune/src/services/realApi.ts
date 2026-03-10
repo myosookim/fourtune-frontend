@@ -5,6 +5,7 @@ import { orderService } from './order.service';
 import { cartService } from './cart.service';
 import { notificationService } from './notification.service';
 import { searchService } from './search.service';
+import { isUserAuthenticated } from './auth.utils';
 
 export const realApi: ApiService = ({
     ...auctionService,
@@ -15,10 +16,7 @@ export const realApi: ApiService = ({
     ...searchService,
 
     // Maintain interface compatibility for isAuthenticated and getCurrentUser
-    isAuthenticated: () => {
-        const token = localStorage.getItem('token');
-        return !!token && token !== 'undefined';
-    },
+    isAuthenticated: () => isUserAuthenticated(),
 
     getCurrentUser: () => {
         const userStr = localStorage.getItem('user');
