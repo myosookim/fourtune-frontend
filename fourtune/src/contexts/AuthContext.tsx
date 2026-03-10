@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { userService } from '../services/user.service';
-import { getStoredToken, parseJwt } from '../services/auth.utils';
+import { getStoredToken, parseJwt, isUserAuthenticated } from '../services/auth.utils';
 
 interface User {
     id?: number;
@@ -87,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (
         <AuthContext.Provider value={{
             user,
-            isAuthenticated: !!user,
+            isAuthenticated: isUserAuthenticated(),
             isLoading,
             login,
             logout,

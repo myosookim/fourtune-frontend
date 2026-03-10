@@ -5,10 +5,11 @@ import { api } from '../../services/api';
 import { LOGO_IMAGE } from '../../constants/images';
 import NotificationDropdown from './NotificationDropdown';
 import { AppIcon } from './Icon/AppIcon';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const Header: React.FC = () => {
     const navigate = useNavigate();
-    const isAuthenticated = api.isAuthenticated();
+    const { isAuthenticated, logout } = useAuth();
     const [unreadCount, setUnreadCount] = useState(0);
 
     const [showNotifications, setShowNotifications] = useState(false);
@@ -40,7 +41,7 @@ export const Header: React.FC = () => {
     }, [isAuthenticated]);
 
     const handleLogout = () => {
-        api.logout();
+        logout();
         navigate('/login');
     };
 
@@ -95,4 +96,3 @@ export const Header: React.FC = () => {
         </header>
     );
 };
-
