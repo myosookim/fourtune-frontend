@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import classes from './Auth.module.css';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import { api } from '../../services/api';
 
 const Signup: React.FC = () => {
@@ -10,12 +12,17 @@ const Signup: React.FC = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
+    const { showToast } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         try {
+            // 1. 회원가입
             await api.signup(nickname, email, password, phoneNumber);
+            // 2. 회원가입 성공 후 자동 로그인 → AuthContext user state 갱신
+            await login(email, password);
             navigate('/');
         } catch (error: any) {
             let message = '회원가입에 실패했습니다.';
@@ -26,7 +33,7 @@ const Signup: React.FC = () => {
                     message = error.response.data.message;
                 }
             }
-            alert(message);
+            showToast(message, 'error');
         } finally {
             setIsLoading(false);
         }

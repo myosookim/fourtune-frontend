@@ -14,7 +14,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const EditAuction: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user: currentUser } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [images, setImages] = useState<File[]>([]);
     const [isBuyNowEnabled, setIsBuyNowEnabled] = useState(false);
@@ -47,7 +47,7 @@ const EditAuction: React.FC = () => {
             api.getAuctionById(Number(id))
                 .then(data => {
                     // Check if current user is seller
-                    if (data.sellerId !== api.getCurrentUser()?.id) {
+                    if (data.sellerId !== currentUser?.id) {
                         showToast('본인의 경매만 수정할 수 있습니다.', 'error');
                         navigate(`/auctions/${id}`);
                         return;

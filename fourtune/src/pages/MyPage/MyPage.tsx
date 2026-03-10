@@ -59,7 +59,7 @@ const MyPage: React.FC = () => {
     }
 
     const fetchUserInfo = async () => {
-        const currentUser = api.getCurrentUser();
+        const currentUser = authUser;
         if (currentUser?.id) {
             try {
                 const data = await api.getUser(currentUser.id);

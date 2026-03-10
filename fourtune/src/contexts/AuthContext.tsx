@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { userService } from '../services/user.service';
-import { getStoredToken, parseJwt, isUserAuthenticated } from '../services/auth.utils';
+import { getStoredToken, parseJwt } from '../services/auth.utils';
 
 interface User {
     id?: number;
@@ -14,6 +14,8 @@ interface AuthContextType {
     isLoading: boolean;
     login: (email: string, password?: string) => Promise<void>;
     logout: () => void;
+    signup: (nickname: string, email: string, password?: string, phoneNumber?: string) => Promise<void>;
+    checkAuth: () => void;
     updateUserProfile: (name: string) => void;
 }
 
@@ -22,29 +24,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-
-    const checkAuth = useCallback(() => {
-        const token = getStoredToken();
-        const userStr = localStorage.getItem('user');
-
-        if (token) {
-            if (userStr) {
-                try {
-                    setUser(JSON.parse(userStr));
-                } catch (e) {
-                    console.error('Failed to parse user from localStorage');
-                    recoverUserFromToken(token);
-                }
-            } else {
-                // 토큰은 있는데 유저 정보가 없는 경우 (예: 새로고침 또는 타임아웃)
-                recoverUserFromToken(token);
-            }
-        } else {
-            setUser(null);
-            localStorage.removeItem('user'); // 토큰 없으면 유저 정보도 삭제
-        }
-        setIsLoading(false);
-    }, []);
 
     const recoverUserFromToken = (token: string) => {
         try {
@@ -62,12 +41,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
+    const checkAuth = useCallback(() => {
+        const token = getStoredToken();
+        const userStr = localStorage.getItem('user');
+
+        if (token) {
+            if (userStr) {
+                try {
+                    setUser(JSON.parse(userStr));
+                } catch (e) {
+                    console.error('Failed to parse user from localStorage');
+                    recoverUserFromToken(token);
+                }
+            } else {
+                // 토큰은 있는데 유저 정보가 없는 경우 (예: 소셜 로그인 콜백, 새로고침)
+                recoverUserFromToken(token);
+            }
+        } else {
+            setUser(null);
+            localStorage.removeItem('user');
+        }
+        setIsLoading(false);
+    }, []);
+
     useEffect(() => {
         checkAuth();
     }, [checkAuth]);
 
     const login = async (email: string, password?: string) => {
         const result = await userService.login(email, password);
+        setUser(result.user);
+    };
+
+    const signup = async (nickname: string, email: string, password?: string, phoneNumber?: string) => {
+        const result = await userService.signup(nickname, email, password, phoneNumber);
         setUser(result.user);
     };
 
@@ -87,10 +94,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return (
         <AuthContext.Provider value={{
             user,
-            isAuthenticated: isUserAuthenticated(),
+            // user state 기반으로 일원화 — user가 설정되면 인증됨
+            isAuthenticated: !!user,
             isLoading,
             login,
             logout,
+            signup,
+            checkAuth,
             updateUserProfile
         }}>
             {children}
