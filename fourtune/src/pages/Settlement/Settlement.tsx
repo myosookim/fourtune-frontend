@@ -3,13 +3,20 @@ import { api } from '../../services/api';
 import { type SettlementResponse, type SettlementCandidatedItemDto } from '../../types';
 import classes from './Settlement.module.css';
 import { LoginRequired } from '../../components/common/LoginRequired';
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 
 const SettlementPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [history, setHistory] = useState<SettlementResponse[]>([]);
     const [pendings, setPendings] = useState<SettlementCandidatedItemDto[]>([]);
 
-    const isAuthenticated = api.isAuthenticated();
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
+    const { isAuthenticated } = useAuth();
+    const { showToast } = useToast();
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -43,9 +50,8 @@ const SettlementPage: React.FC = () => {
         }
     };
 
-    if (loading) {
-        return <div className={classes.container} style={{ textAlign: 'center', marginTop: '4rem' }}>Loading settlement data...</div>;
-    }
+    if (shouldShowLoading) return <LoadingIndicator message="정산 데이터를 불러오는 중..." fullPage />;
+    if (loading) return null;
 
     const totalSettledAmount = history.reduce((sum, item) => sum + item.totalAmount, 0);
 
@@ -132,7 +138,7 @@ const SettlementPage: React.FC = () => {
                                         <td className={classes.amount}>{settlement.totalAmount.toLocaleString()}원</td>
                                         <td>
                                             <button
-                                                onClick={() => alert('상세 보기 기능은 준비 중입니다.\n\n포함된 항목:\n' + settlement.items.map(i => `- ${i.relTypeCode} #${i.relId} (${i.amount.toLocaleString()}원)`).join('\n'))}
+                                                onClick={() => showToast(`포함 항목: ${settlement.items.map(i => `${i.relTypeCode} #${i.relId} (${i.amount.toLocaleString()}원)`).join(', ')}`, 'info')}
                                             >
                                                 상세보기
                                             </button>

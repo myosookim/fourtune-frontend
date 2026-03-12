@@ -1,0 +1,73 @@
+.skeleton {
+    cursor: default;
+    pointer-events: none;
+}
+
+.skeletonImage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            var(--color-bg-surface-hover) 25%,
+            var(--color-border) 50%,
+            var(--color-bg-surface-hover) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.skeletonLine {
+    height: 1rem;
+    background: linear-gradient(90deg,
+            var(--color-bg-surface-hover) 25%,
+            var(--color-border) 50%,
+            var(--color-bg-surface-hover) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem;
+}
+
+.skeletonCategory {
+    width: 30%;
+    height: 0.75rem;
+}
+
+.skeletonTitle {
+    width: 90%;
+    height: 1.25rem;
+}
+
+.skeletonTitleShort {
+    width: 60%;
+    height: 1.25rem;
+}
+
+.skeletonLabel {
+    width: 40%;
+    height: 0.8rem;
+}
+
+.skeletonPrice {
+    width: 50%;
+    height: 1.5rem;
+    margin-bottom: 0;
+}
+
+.skeletonStats {
+    width: 100%;
+    height: 1rem;
+    background: var(--color-bg-surface-hover);
+    border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}

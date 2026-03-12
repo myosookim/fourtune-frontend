@@ -1,51 +1,46 @@
-import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { api } from '../../services/api';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '../../contexts/AuthContext';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { auctionService } from '../../services/auction.service';
 import { type AuctionItem } from '../../types';
 import { AuctionCard } from '../../components/features/AuctionCard';
+import { AuctionCardSkeleton } from '../../components/features/AuctionCardSkeleton';
 import { SearchBar } from '../../components/features/SearchBar/SearchBar';
 import classes from './Home.module.css';
 
 const Home: React.FC = () => {
-    const [recommendedItems, setRecommendedItems] = useState<AuctionItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
     const handleSearch = (keyword: string) => {
         navigate(`/auctions?keyword=${encodeURIComponent(keyword)}`);
     };
 
-    useEffect(() => {
-        const fetchRecommended = async () => {
+    const { data: recommendedItems = [], isLoading } = useQuery({
+        queryKey: ['recommendations', isAuthenticated],
+        queryFn: async () => {
             try {
-                let items;
-                if (api.isAuthenticated()) {
-                    items = await api.getRecommendations(8);
+                if (isAuthenticated) {
+                    return await auctionService.getRecommendations(8);
                 } else {
-                    items = await api.getPopularRecommendations(8);
+                    return await auctionService.getPopularRecommendations(8);
                 }
-                setRecommendedItems(items);
             } catch (error) {
                 console.error('Failed to fetch recommended items', error);
-
-                // Final fallback to search API if recommendation service is down
-                try {
-                    const fallback = await api.searchAuctions({
-                        page: 0,
-                        size: 8,
-                        sort: 'POPULAR'
-                    });
-                    setRecommendedItems(fallback.content);
-                } catch (e) {
-                    console.error('All recommendation options failed', e);
-                }
-            } finally {
-                setLoading(false);
+                // Fallback to search API
+                const fallback = await auctionService.searchAuctions({
+                    page: 0,
+                    size: 8,
+                    sort: 'POPULAR'
+                });
+                return fallback.content;
             }
-        };
+        },
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
 
-        fetchRecommended();
-    }, []);
+    const shouldShowSkeleton = useLoadingDelay(isLoading, 300);
 
     return (
         <div>
@@ -75,15 +70,17 @@ const Home: React.FC = () => {
                     </Link>
                 </div>
 
-                {loading ? (
-                    <div className={classes.loader}>상품을 불러오는 중...</div>
-                ) : (
-                    <div className={classes.grid}>
-                        {recommendedItems.map(item => (
+                <div className={classes.grid}>
+                    {shouldShowSkeleton ? (
+                        Array.from({ length: 8 }).map((_, idx) => (
+                            <AuctionCardSkeleton key={idx} />
+                        ))
+                    ) : !isLoading ? (
+                        recommendedItems.map((item: AuctionItem) => (
                             <AuctionCard key={item.auctionItemId} item={item} />
-                        ))}
-                    </div>
-                )}
+                        ))
+                    ) : null}
+                </div>
             </section>
         </div>
     );

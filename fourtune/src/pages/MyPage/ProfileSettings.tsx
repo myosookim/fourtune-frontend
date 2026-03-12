@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { type UserDetail } from '../../services/api.interface';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import classes from './ProfileSettings.module.css';
 
 interface Props {
@@ -9,6 +11,8 @@ interface Props {
 }
 
 const ProfileSettings: React.FC<Props> = ({ userInfo, onUpdate }) => {
+    const { updateUserProfile } = useAuth();
+    const { showToast } = useToast();
     const [nickname, setNickname] = useState('');
     const [phone, setPhone] = useState('');
 
@@ -33,11 +37,12 @@ const ProfileSettings: React.FC<Props> = ({ userInfo, onUpdate }) => {
         e.preventDefault();
         try {
             await api.updateProfile(nickname, phone);
-            alert('프로필이 수정되었습니다.');
+            updateUserProfile(nickname);
+            showToast('프로필이 수정되었습니다.');
             setIsEditingProfile(false);
             onUpdate();
         } catch (e: any) {
-            alert(e.response?.data?.message || '프로필 수정 실패');
+            showToast(e.response?.data?.message || '프로필 수정 실패', 'error');
         }
     };
 
@@ -45,12 +50,12 @@ const ProfileSettings: React.FC<Props> = ({ userInfo, onUpdate }) => {
         e.preventDefault();
         try {
             await api.changePassword(currentPassword, newPassword);
-            alert('비밀번호가 변경되었습니다.');
+            showToast('비밀번호가 변경되었습니다.');
             setIsChangingPassword(false);
             setCurrentPassword('');
             setNewPassword('');
         } catch (e: any) {
-            alert(e.response?.data?.message || '비밀번호 변경에 실패했습니다.');
+            showToast(e.response?.data?.message || '비밀번호 변경에 실패했습니다.', 'error');
         }
     };
 
@@ -59,10 +64,10 @@ const ProfileSettings: React.FC<Props> = ({ userInfo, onUpdate }) => {
         if (window.confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 데이터가 삭제됩니다.')) {
             try {
                 await api.withdraw(withdrawPassword, withdrawReason);
-                alert('회원 탈퇴가 완료되었습니다.');
+                showToast('회원 탈퇴가 완료되었습니다.');
                 window.location.href = '/';
             } catch (e: any) {
-                alert(e.response?.data?.message || '탈퇴 실패');
+                showToast(e.response?.data?.message || '탈퇴 실패', 'error');
             }
         }
     };

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import classes from './Auth.module.css';
-import { api } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 
 import googleSignIn1x from '../../assets/social/google/si/web_light_sq_SI@1x.png';
 import googleSignIn2x from '../../assets/social/google/si/web_light_sq_SI@2x.png';
@@ -12,12 +13,14 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
+    const { showToast } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await api.login(email, password);
+            await login(email, password);
             navigate('/');
         } catch (error: any) {
             let message = '로그인에 실패했습니다.';
@@ -28,7 +31,7 @@ const Login: React.FC = () => {
                     message = error.response.data.message;
                 }
             }
-            alert(message);
+            showToast(message, 'error');
         } finally {
             setIsLoading(false);
         }

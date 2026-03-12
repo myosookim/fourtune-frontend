@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { type NotificationSettingsResponse } from '../../services/api.interface';
 import classes from './NotificationSettings.module.css';
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { useToast } from '../../contexts/ToastContext';
 
 const NotificationSettings: React.FC = () => {
     const [settings, setSettings] = useState<NotificationSettingsResponse>({
@@ -11,6 +14,10 @@ const NotificationSettings: React.FC = () => {
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const { showToast } = useToast();
+
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -35,21 +42,19 @@ const NotificationSettings: React.FC = () => {
     };
 
     const handleSave = async () => {
-        setSaving(true);
         try {
             await api.updateNotificationSettings(settings);
-            alert('알림 설정이 저장되었습니다.');
+            showToast('알림 설정이 저장되었습니다.');
         } catch (err) {
             console.error("Failed to update notification settings", err);
-            alert('설정 저장 중 오류가 발생했습니다.');
+            showToast('설정 저장 중 오류가 발생했습니다.', 'error');
         } finally {
             setSaving(false);
         }
     };
 
-    if (loading) {
-        return <div style={{ textAlign: 'center', padding: '60px 0', color: '#666' }}>로딩 중...</div>;
-    }
+    if (shouldShowLoading) return <LoadingIndicator message="알림 설정을 불러오는 중..." />;
+    if (loading) return null;
 
     return (
         <div className={classes.settingsContainer}>

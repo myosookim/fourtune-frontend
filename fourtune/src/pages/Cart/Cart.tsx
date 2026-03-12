@@ -1,19 +1,31 @@
 import React, { useEffect, useState } from 'react';
-// Force TS Recheck
 import { Link, useNavigate } from 'react-router-dom';
 import { LoginRequired } from '../../components/common/LoginRequired';
 import { api } from '../../services/api';
 import { type CartResponse, type CartItemResponse, CartItemStatus } from '../../types';
+import { useToast } from '../../contexts/ToastContext';
+import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
+import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { useAuth } from '../../contexts/AuthContext';
 import classes from './Cart.module.css';
 
 const Cart: React.FC = () => {
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
     const [cart, setCart] = useState<CartResponse | null>(null);
     const [loading, setLoading] = useState(true);
+    const { showToast } = useToast();
+
+    // Flicker prevention
+    const shouldShowLoading = useLoadingDelay(loading, 300);
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [processing, setProcessing] = useState(false);
 
-    const isAuthenticated = api.isAuthenticated();
+    useEffect(() => {
+        if (isAuthenticated) {
+            loadCart();
+        }
+    }, [isAuthenticated]);
 
     if (!isAuthenticated) {
         return (
@@ -22,10 +34,6 @@ const Cart: React.FC = () => {
             />
         );
     }
-
-    useEffect(() => {
-        loadCart();
-    }, []);
 
     const loadCart = async () => {
         try {
@@ -40,7 +48,7 @@ const Cart: React.FC = () => {
             setSelectedIds(new Set(activeIds));
         } catch (error) {
             console.error('Failed to load cart', error);
-            alert('장바구니를 불러오는데 실패했습니다.');
+            showToast('장바구니를 불러오는데 실패했습니다.', 'error');
         } finally {
             setLoading(false);
         }
@@ -83,7 +91,7 @@ const Cart: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to remove item', error);
-            alert('삭제에 실패했습니다.');
+            showToast('삭제에 실패했습니다.', 'error');
         }
     };
 
@@ -121,22 +129,22 @@ const Cart: React.FC = () => {
             if (orderIds.length === 1) {
                 navigate(`/payment?orderId=${orderIds[0]}`);
             } else if (orderIds.length > 1) {
-                alert(`${orderIds.length}개의 주문이 생성되었습니다. 내 주문 목록에서 결제를 진행해주세요.`);
+                showToast(`${orderIds.length}개의 주문이 생성되었습니다.`);
                 navigate('/my/orders');
             } else {
-                alert('주문 생성에 실패했습니다 (No ID returned).');
+                showToast('주문 생성에 실패했습니다.', 'error');
             }
 
         } catch (error: any) {
             console.error('Checkout failed', error);
-            alert(error.response?.data?.message || '주문 생성에 실패했습니다.');
+            showToast(error.response?.data?.message || '주문 생성에 실패했습니다.', 'error');
         } finally {
             setProcessing(false);
         }
     };
 
-    if (loading) return <div className={classes.container}>Loading...</div>;
-    if (!cart) return <div className={classes.container}>Error loading cart</div>;
+    if (shouldShowLoading) return <LoadingIndicator message="장바구니를 불러오는 중..." fullPage />;
+    if (loading || !cart) return null;
 
     const activeItems = cart.items.filter((item: CartItemResponse) => item.status === CartItemStatus.ACTIVE);
     const selectedItems = activeItems.filter((item: CartItemResponse) => selectedIds.has(item.id));

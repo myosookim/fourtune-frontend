@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
-
+import { useToast } from '../../contexts/ToastContext';
 import classes from './PaymentResult.module.css';
 
 const PaymentSuccess: React.FC = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [status, setStatus] = useState<'loading' | 'success' | 'fail'>('loading');
 
     const isProcessing = React.useRef(false);
@@ -17,7 +18,7 @@ const PaymentSuccess: React.FC = () => {
         const amount = searchParams.get('amount');
 
         if (!paymentKey || !orderId || !amount) {
-            alert('결제 정보가 부족합니다.');
+            showToast('결제 정보가 부족합니다.', 'error');
             navigate('/');
             return;
         }
