@@ -91,7 +91,7 @@ const CreateAuction: React.FC = () => {
 
         const error = validateForm();
         if (error) {
-            alert(error);
+            showToast(error, 'error');
             return;
         }
 
@@ -104,7 +104,7 @@ const CreateAuction: React.FC = () => {
             };
 
             const createdAuction = await api.createAuction(payload, images.length > 0 ? images : undefined);
-            alert('경매 상품이 등록되었습니다!');
+            showToast('경매 상품이 등록되었습니다!');
             navigate(`/auctions/${createdAuction.auctionItemId}`);
         } catch (e) {
             const error = e as AxiosError<any>;
@@ -131,7 +131,7 @@ const CreateAuction: React.FC = () => {
                 message = error.message;
             }
 
-            alert(`${message}\n\n상세 정보: ${details}`);
+            showToast(`${message} ${details ? '- ' + details : ''}`, 'error');
         } finally {
             setIsLoading(false);
         }

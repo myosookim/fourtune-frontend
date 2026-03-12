@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { api } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
 import classes from './SearchBar.module.css';
 
 interface SearchBarProps {
@@ -17,6 +18,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     placeholder = '시작할 검색어를 입력하세요...',
     size = 'default'
 }) => {
+    const { isAuthenticated } = useAuth();
     const [keyword, setKeyword] = useState(initialValue);
     const [recentSearches, setRecentSearches] = useState<string[]>([]);
     const [showRecent, setShowRecent] = useState(false);
@@ -27,7 +29,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }, [initialValue]);
 
     const fetchRecentSearches = async () => {
-        if (!api.isAuthenticated()) return;
+        if (!isAuthenticated) return;
         try {
             const data = await api.getRecentSearches();
             setRecentSearches(data || []);

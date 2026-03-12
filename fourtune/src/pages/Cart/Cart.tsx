@@ -21,6 +21,12 @@ const Cart: React.FC = () => {
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
     const [processing, setProcessing] = useState(false);
 
+    useEffect(() => {
+        if (isAuthenticated) {
+            loadCart();
+        }
+    }, [isAuthenticated]);
+
     if (!isAuthenticated) {
         return (
             <LoginRequired
@@ -28,10 +34,6 @@ const Cart: React.FC = () => {
             />
         );
     }
-
-    useEffect(() => {
-        loadCart();
-    }, []);
 
     const loadCart = async () => {
         try {

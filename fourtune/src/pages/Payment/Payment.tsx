@@ -3,13 +3,15 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import type { OrderDetailResponse } from '../../services/api.interface';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
-import styles from '../Order/OrderSheet.module.css'; // Reuse OrderSheet styles
+import styles from '../Order/OrderSheet.module.css';
 import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
 import { useLoadingDelay } from '../../hooks/useLoadingDelay';
+import { useToast } from '../../contexts/ToastContext';
 
 const Payment: React.FC = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const orderId = searchParams.get('orderId');
 
     const [order, setOrder] = useState<OrderDetailResponse | null>(null);
@@ -71,7 +73,7 @@ const Payment: React.FC = () => {
                 return;
             }
             console.error('Payment request failed:', err);
-            alert('결제 요청 중 오류가 발생했습니다.');
+            showToast('결제 요청 중 오류가 발생했습니다.', 'error');
         }
     };
 
