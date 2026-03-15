@@ -78,19 +78,5 @@ export const userService = {
         await axiosClient.delete('/api/users/withdraw', { data: { password, reason } });
         userService.logout();
     },
-
-    getWalletBalance: async () => {
-        const response = await axiosClient.get('/api/payments/wallets/balance');
-        return response.data.data;
-    },
-
-    getWalletHistory: async () => {
-        const response = await axiosClient.get('/api/payments/wallets/history');
-        return response.data.data;
-    },
-
-    getWalletSummary: async () => {
-        const response = await axiosClient.get('/api/payments/wallets/summary');
-        return response.data.data;
-    }
 };
+

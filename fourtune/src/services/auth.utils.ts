@@ -1,7 +1,7 @@
 export function parseJwt(token: string) {
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 
@@ -15,5 +15,14 @@ export function getStoredToken(): string | null {
 }
 
 export function isUserAuthenticated(): boolean {
-    return !!getStoredToken();
+    const token = getStoredToken();
+    if (!token) return false;
+    try {
+        const { exp } = parseJwt(token);
+        // exp가 없는 토큰은 만료 없음으로 간주
+        if (!exp) return true;
+        return exp * 1000 > Date.now();
+    } catch {
+        return false;
+    }
 }
