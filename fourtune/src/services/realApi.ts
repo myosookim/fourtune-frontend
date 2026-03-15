@@ -7,7 +7,7 @@ import { notificationService } from './notification.service';
 import { searchService } from './search.service';
 import { isUserAuthenticated } from './auth.utils';
 
-export const realApi: ApiService = ({
+export const realApi: ApiService = {
     ...auctionService,
     ...userService,
     ...orderService,
@@ -29,4 +29,4 @@ export const realApi: ApiService = ({
         }
         return null;
     }
-} as any) as ApiService;
+};
