@@ -86,7 +86,7 @@ const AuctionDetail: React.FC = () => {
                 })
                 .finally(() => setLoading(false));
         }
-    }, [id]);
+    }, [id, isAuthenticated]);
 
     // Smart Polling: ACTIVE 경매에서 15초마다 입찰가 및 상태 자동 갱신
     useSmartPolling(() => {
@@ -232,7 +232,8 @@ const AuctionDetail: React.FC = () => {
 
     const handleDeleteAuction = async () => {
         if (!item) return;
-        if (!confirm('경매를 삭제하시겠습니까?')) return;
+        const confirmed = await confirm('경매를 삭제하시겠습니까?');
+        if (!confirmed) return;
 
         try {
             await api.deleteAuction(item.auctionItemId);

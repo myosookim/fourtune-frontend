@@ -5,7 +5,6 @@ import { type AuctionItem, AuctionStatus } from '../../types';
 import { type UserDetail } from '../../services/api.interface';
 import { AuctionCard } from '../../components/features/AuctionCard';
 import classes from './MyPage.module.css';
-import { LoginRequired } from '../../components/common/LoginRequired';
 import ProfileSettings from './ProfileSettings';
 import WalletHistory from './WalletHistory';
 import NotificationSettings from './NotificationSettings';
@@ -54,10 +53,6 @@ const MyPage: React.FC = () => {
     const { isAuthenticated, user: authUser } = useAuth();
     const user = authUser || { name: '비회원', email: '' };
 
-    if (!isAuthenticated) {
-        return <LoginRequired message="로그인이 필요한 서비스입니다." />;
-    }
-
     const fetchUserInfo = async () => {
         const currentUser = authUser;
         if (currentUser?.id) {
@@ -71,8 +66,10 @@ const MyPage: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchUserInfo();
-    }, []);
+        if (isAuthenticated) {
+            fetchUserInfo();
+        }
+    }, [isAuthenticated, authUser?.id]);
 
     useEffect(() => {
         if (activeTab === 'watchlist') fetchWatchlist();
@@ -135,7 +132,8 @@ const MyPage: React.FC = () => {
     };
 
     const handleCancelBid = async (bidId: number) => {
-        if (!confirm('입찰을 취소하시겠습니까?')) return;
+        const confirmed = await confirm('입찰을 취소하시겠습니까?');
+        if (!confirmed) return;
         try {
             await api.cancelBid(bidId);
             showToast('입찰이 취소되었습니다.');
@@ -146,7 +144,8 @@ const MyPage: React.FC = () => {
     };
 
     const handleCancelOrder = async (orderId: string) => {
-        if (!confirm('주문을 취소하시겠습니까?')) return;
+        const confirmed = await confirm('주문을 취소하시겠습니까?');
+        if (!confirmed) return;
         try {
             await api.cancelOrder(orderId);
             showToast('주문이 취소되었습니다.');
@@ -157,7 +156,8 @@ const MyPage: React.FC = () => {
     };
 
     const handleDeleteAuction = async (id: number) => {
-        if (!confirm('경매를 삭제하시겠습니까?')) return;
+        const confirmed = await confirm('경매를 삭제하시겠습니까?');
+        if (!confirmed) return;
         try {
             await api.deleteAuction(id);
             showToast('경매가 삭제되었습니다.');

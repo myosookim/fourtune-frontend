@@ -4,6 +4,7 @@ import { LoginRequired } from '../../components/common/LoginRequired';
 import { api } from '../../services/api';
 import { type CartResponse, type CartItemResponse, CartItemStatus } from '../../types';
 import { useToast } from '../../contexts/ToastContext';
+import { useConfirm } from '../../contexts/ConfirmContext';
 import { LoadingIndicator } from '../../components/common/LoadingIndicator/LoadingIndicator';
 import { useLoadingDelay } from '../../hooks/useLoadingDelay';
 import { useAuth } from '../../contexts/AuthContext';
@@ -15,6 +16,7 @@ const Cart: React.FC = () => {
     const [cart, setCart] = useState<CartResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
+    const { confirm } = useConfirm();
 
     // Flicker prevention
     const shouldShowLoading = useLoadingDelay(loading, 300);
@@ -76,7 +78,8 @@ const Cart: React.FC = () => {
     };
 
     const handleRemove = async (cartItemId: number) => {
-        if (!confirm('정말 삭제하시겠습니까?')) return;
+        const confirmed = await confirm('정말 삭제하시겠습니까?');
+        if (!confirmed) return;
         try {
             await api.removeItemFromCart(cartItemId);
             // Reload cart

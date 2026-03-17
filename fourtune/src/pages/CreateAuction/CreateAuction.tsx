@@ -6,15 +6,15 @@ import { api } from '../../services/api';
 import { AuctionCategory } from '../../types';
 import type { CreateAuctionRequest } from '../../services/api.interface';
 import { AUCTION_CATEGORY_KO } from '../../constants/translations';
-import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 
 const CreateAuction: React.FC = () => {
     const navigate = useNavigate();
-    const { isAuthenticated } = useAuth();
+    // Authentication is handled by PrivateRoute
     const { showToast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
     const [images, setImages] = useState<File[]>([]);
+    const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [isBuyNowEnabled, setIsBuyNowEnabled] = useState(false); // Toggle state
 
     // Helper to get local ISO string (YYYY-MM-DDTHH:mm) for datetime-local input
@@ -36,13 +36,18 @@ const CreateAuction: React.FC = () => {
         endAt: getFutureDate(5),      // Default: 5 days later
     });
 
-    // Check authentication on mount
+    // Authentication is now handled by PrivateRoute wrapper in App.tsx
+
+    // Cleanup object URLs to prevent memory leaks
     useEffect(() => {
-        if (!isAuthenticated) {
-            showToast('로그인이 필요합니다.', 'info');
-            navigate('/login');
-        }
-    }, [isAuthenticated, navigate]);
+        const urls = images.map(file => URL.createObjectURL(file));
+        setPreviewUrls(urls);
+
+        // Cleanup function runs when `images` changes or component unmounts
+        return () => {
+            urls.forEach(url => URL.revokeObjectURL(url));
+        };
+    }, [images]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -303,12 +308,12 @@ const CreateAuction: React.FC = () => {
                             multiple
                         />
                         <p className={classes.hint}>최대 5개의 이미지를 업로드할 수 있습니다.</p>
-                        {images.length > 0 && (
+                        {previewUrls.length > 0 && (
                             <div className={classes.imagePreview}>
-                                {images.map((file, index) => (
+                                {previewUrls.map((url, index) => (
                                     <div key={index} className={classes.previewItem}>
                                         <img
-                                            src={URL.createObjectURL(file)}
+                                            src={url}
                                             alt={`Preview ${index + 1}`}
                                             className={classes.previewImage}
                                         />

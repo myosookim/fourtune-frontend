@@ -3,6 +3,7 @@ import { api } from '../../services/api';
 import { type UserDetail } from '../../services/api.interface';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useConfirm } from '../../contexts/ConfirmContext';
 import classes from './ProfileSettings.module.css';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 const ProfileSettings: React.FC<Props> = ({ userInfo, onUpdate }) => {
     const { updateUserProfile } = useAuth();
     const { showToast } = useToast();
+    const { confirm } = useConfirm();
     const [nickname, setNickname] = useState('');
     const [phone, setPhone] = useState('');
 
@@ -61,7 +63,8 @@ const ProfileSettings: React.FC<Props> = ({ userInfo, onUpdate }) => {
 
     const handleWithdraw = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (window.confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 데이터가 삭제됩니다.')) {
+        const confirmed = await confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없으며, 모든 데이터가 삭제됩니다.');
+        if (confirmed) {
             try {
                 await api.withdraw(withdrawPassword, withdrawReason);
                 showToast('회원 탈퇴가 완료되었습니다.');

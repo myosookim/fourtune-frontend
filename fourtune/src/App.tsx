@@ -17,6 +17,8 @@ import SettlementPage from './pages/Settlement/Settlement';
 import LoginSuccess from './pages/Auth/LoginSuccess';
 import EditAuction from './pages/EditAuction/EditAuction';
 
+import { PrivateRoute } from './components/common/PrivateRoute';
+
 function App() {
     return (
         <Routes>
@@ -24,19 +26,24 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/login-success" element={<LoginSuccess />} />
             <Route path="/" element={<Layout />}>
+                {/* Public routes */}
                 <Route index element={<Home />} />
                 <Route path="auctions" element={<AuctionList />} />
-                <Route path="auctions/create" element={<CreateAuction />} />
-                <Route path="auctions/edit/:id" element={<EditAuction />} />
                 <Route path="auctions/:id" element={<AuctionDetail />} />
-                <Route path="cart" element={<Cart />} />
-                <Route path="settlement" element={<SettlementPage />} />
-                <Route path="mypage" element={<MyPage />} />
-                <Route path="my/orders" element={<MyOrders />} />
-                <Route path="payment" element={<Payment />} />
-                <Route path="payment/success" element={<PaymentSuccess />} />
-                <Route path="payment/fail" element={<PaymentFail />} />
-                <Route path="order/:orderId" element={<OrderSheet />} />
+
+                {/* Protected routes */}
+                <Route element={<PrivateRoute />}>
+                    <Route path="auctions/create" element={<CreateAuction />} />
+                    <Route path="auctions/edit/:id" element={<EditAuction />} />
+                    <Route path="cart" element={<Cart />} />
+                    <Route path="settlement" element={<SettlementPage />} />
+                    <Route path="mypage" element={<MyPage />} />
+                    <Route path="my/orders" element={<MyOrders />} />
+                    <Route path="payment" element={<Payment />} />
+                    <Route path="payment/success" element={<PaymentSuccess />} />
+                    <Route path="payment/fail" element={<PaymentFail />} />
+                    <Route path="order/:orderId" element={<OrderSheet />} />
+                </Route>
             </Route>
         </Routes>
     );
