@@ -68,34 +68,39 @@ npm run dev
 
 - **회원가입/로그인**: JWT 기반 인증
 - **경매 리스트**: 카테고리별 필터, 상태별(진행중/예정/종료) 필터, 검색 기능
-- **상세 페이지**: 상품 상세 정보, 이미지 갤러리, 입찰/즉시구매 기능
-- **마이페이지**: 내 정보, 관심 상품 관리 (Wishlist)
+- **상세 페이지**: 상품 상세 정보, 갤러리, 입찰/즉시구매, 관심 상품(찜) 처리
+- **장바구니 및 구매**: 장바구니 담기, 선택 구매 및 토스페이먼츠(Toss Payments) 연동 결제
+- **마이페이지 및 정산**: 내 정보(프로필/지갑), 입찰 및 구매 내역 관리, 판매자 정산 처리
+- **UX 공통화**: 전역 Toast 알림 및 Confirm 모달 시스템 적용
 
 ## 📁 프로젝트 구조
 
 ```
 src/
 ├── assets/         # 정적 자원 (이미지, 아이콘 등)
-├── components/     # 재사용 가능한 컴포넌트
-│   ├── common/     # 레이아웃, 헤더 등 공통 컴포넌트
-│   └── features/   # 특정 기능과 관련된 컴포넌트
-├── constants/      # 상수 데이터 (번역 등)
-├── pages/          # 페이지 단위 컴포넌트 (Routing)
-│   ├── Auth/       # 로그인, 회원가입
-│   ├── AuctionList/# 경매 리스트
-│   ├── AuctionDetail/# 경매 상세 페이지
-│   ├── Cart/       # 장바구니
-│   ├── CreateAuction/# 경매 생성
-│   ├── Home/       # 메인 홈페이지
-│   ├── MyPage/     # 마이페이지
-│   ├── Order/      # 주문서 작성
-│   ├── Payment/    # 결제 결과 처리
-│   └── Settlement/ # 정산 관리
-├── services/       # API 통신 로직
-│   ├── api.interface.ts # API 인터페이스 정의
-│   ├── api.ts      # API 진입점 (Mock/Real 분기 처리)
-│   ├── mockApi.ts  # 가상 API 구현
-│   ├── realApi.ts  # 실제 백엔드 통신 구현
-│   └── mockData.ts # 가상 데이터 정의
-└── types/          # TypeScript 타입 정의
+├── components/     # 재사용 가능한 UI 컴포넌트
+│   ├── common/     # 공통 컴포넌트 (Button, Input, Modal, PrivateRoute 등)
+│   └── features/   # 도메인/기능별 컴포넌트
+├── constants/      # 프로젝트 전역 상수 및 번역 데이터
+├── contexts/       # 전역 상태 관리 (AuthContext, ToastContext, ConfirmContext)
+├── hooks/          # 커스텀 훅 (스마트 폴링, 딜레이 등)
+├── pages/          # 라우팅 되는 페이지 컴포넌트
+│   ├── Auth/       # 로그인, 회원가입 등
+│   ├── AuctionDetail/  # 경매 상세 정보 및 입찰
+│   ├── AuctionList/    # 경매 목록 및 필터링
+│   ├── Cart/           # 장바구니 관리
+│   ├── CreateAuction/  # 경매 등록
+│   ├── EditAuction/    # 경매 수정
+│   ├── Home/           # 메인 페이지
+│   ├── MyPage/         # 마이페이지 (내 정보, 내 경매 등)
+│   ├── Order/          # 주문서 작성
+│   ├── Payment/        # 결제 결과 처리
+│   └── Settlement/     # 판매자 정산 관리
+├── services/       # API 통신 및 비즈니스 로직
+│   ├── axiosClient.ts # Axios 인스턴스 및 인터셉터 (토큰 관리)
+│   ├── api.ts      # 최상위 API Facade
+│   ├── realApi.ts  # 실제 백엔드 연동 구현체
+│   ├── mockApi.ts  # 테스트용 가상 API 구현체
+│   └── *.service.ts# 도메인별 서비스 로직 (auth, auction, order, payment, settlement, user)
+└── types/          # 전역 TypeScript 타입 및 인터페이스
 ```
